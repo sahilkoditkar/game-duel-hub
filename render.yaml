@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: game-hub
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    plan: free
+    branch: main
+    envVars:
+      - key: NODE_VERSION
+        value: 18.x

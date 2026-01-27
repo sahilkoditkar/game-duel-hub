@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Hub</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Game Hub</h1>
+            <p>Play games</p>
+        </header>
+
+        <main id="lobby-view">
+            <div class="card">
+                <h2>Create Room</h2>
+                <div class="form-group">
+                    <label for="game-select">Choose Game</label>
+                    <select id="game-select" class="input dark">
+                        <option value="tictactoe">Tic-Tac-Toe</option>
+                        <option value="dotsandboxes">Dots and Boxes</option>
+                        <option value="bingo">Bingo</option>
+                        <!-- Add more games here -->
+                    </select>
+                </div>
+                <button id="create-btn" class="btn primary">Create Room</button>
+            </div>
+
+            <div class="card">
+                <h2>Join Room</h2>
+                <div class="form-group">
+                    <label for="room-id-input">Room ID</label>
+                    <input type="text" id="room-id-input" placeholder="Enter 6-character code" maxlength="6">
+                </div>
+                <button id="join-btn" class="btn secondary">Join Room</button>
+            </div>
+        </main>
+
+        <div id="game-container" class="hidden">
+            <div class="game-header">
+                <div id="scoreboard">
+                    P1: <span id="s1">0</span> - P2: <span id="s2">0</span>
+                </div>
+                <span id="room-info">Room: <span id="current-room-id">...</span></span>
+            </div>
+            <div id="game-area">
+                <!-- Game content will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="game-over-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="modal-message">Game Over</h2>
+            <div class="modal-controls">
+                <button id="modal-play-again" class="btn primary">Play Again</button>
+                <button id="modal-leave" class="btn secondary">Leave Room</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
