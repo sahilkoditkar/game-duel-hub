@@ -90,6 +90,24 @@ socket.on('game_start', (data) => {
         } else {
             loadGameScript('bingo', data);
         }
+    } else if (data.gameType === 'battleship') {
+        if (typeof initBattleship === 'function') {
+            initBattleship(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
+        } else {
+            loadGameScript('battleship', data);
+        }
+    } else if (data.gameType === 'hangman') {
+        if (typeof initHangman === 'function') {
+            initHangman(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
+        } else {
+            loadGameScript('hangman', data);
+        }
+    } else if (data.gameType === 'mastermind') {
+        if (typeof initMastermind === 'function') {
+            initMastermind(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
+        } else {
+            loadGameScript('mastermind', data);
+        }
     } else {
         // Default TicTacToe
         if (typeof initTicTacToe === 'function') {
@@ -132,6 +150,12 @@ function loadGameScript(gameType, data) {
             initDotsAndBoxes(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
         } else if (gameType === 'bingo' && typeof initBingo === 'function') {
             initBingo(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
+        } else if (gameType === 'battleship' && typeof initBattleship === 'function') {
+            initBattleship(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
+        } else if (gameType === 'hangman' && typeof initHangman === 'function') {
+            initHangman(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
+        } else if (gameType === 'mastermind' && typeof initMastermind === 'function') {
+            initMastermind(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
         } else if (typeof initTicTacToe === 'function') {
             initTicTacToe(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
         }

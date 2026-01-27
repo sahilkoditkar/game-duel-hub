@@ -1,8 +1,8 @@
 const BaseGame = require('./base-game');
 
 class Bingo extends BaseGame {
-    constructor(roomId, players) {
-        super(roomId, players);
+    constructor(roomId, players, startingPlayerIndex) {
+        super(roomId, players, startingPlayerIndex);
         this.size = 5;
         this.maxNumber = 25; // 1-25
 
@@ -13,7 +13,7 @@ class Bingo extends BaseGame {
         ];
 
         this.selectedNumbers = new Set();
-        this.activePlayerIndex = 0;
+        // this.activePlayerIndex is set by BaseGame
         this.isGameOver = false;
         this.winner = null;
 

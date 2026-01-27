@@ -1,8 +1,8 @@
 const BaseGame = require('./base-game');
 
 class TicTacToe extends BaseGame {
-    constructor(id, players) {
-        super(id, players);
+    constructor(id, players, startingPlayerIndex) {
+        super(id, players, startingPlayerIndex);
         // Board is 3x3 grid, represented by array of 9 nulls
         this.gameState = {
             board: Array(9).fill(null),

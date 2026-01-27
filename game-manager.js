@@ -45,15 +45,18 @@ class GameManager {
 
         console.log(`User ${socket.id} joined room ${roomId}`);
 
-        // Start game if 2 players
-        this.startGame(roomId);
+        // Default TicTacToe
+        this.startGame(roomId, 0);
     }
 
-    startGame(roomId) {
+    startGame(roomId, startingPlayerIndex = 0) {
         const room = this.rooms.get(roomId);
         if (!room || room.players.length !== 2) return;
 
         console.log(`Starting game in room ${roomId} (Type: ${room.type})`);
+
+        // Store who started this game
+        room.lastStarterIndex = startingPlayerIndex;
 
         let GameClass;
         if (room.type === 'tictactoe') {
@@ -62,15 +65,33 @@ class GameManager {
             GameClass = require('./games/dotsandboxes');
         } else if (room.type === 'bingo') {
             GameClass = require('./games/bingo');
+        } else if (room.type === 'battleship') {
+            GameClass = require('./games/battleship');
+        } else if (room.type === 'hangman') {
+            GameClass = require('./games/hangman');
+            // Ensure usedWords exists
+            if (!room.usedWords) room.usedWords = [];
+        } else if (room.type === 'mastermind') {
+            GameClass = require('./games/mastermind');
         } else {
             console.error('Unknown game type:', room.type);
             return;
         }
 
-        room.game = new GameClass(roomId, room.players);
+        // Special Constructor handling
+        if (room.type === 'hangman') {
+            room.game = new GameClass(roomId, room.players, startingPlayerIndex, room.usedWords);
+            if (room.game.word) room.usedWords.push(room.game.word);
+        } else if (room.type === 'mastermind') {
+            // Pass lastMakerIndex if exists
+            room.game = new GameClass(roomId, room.players, startingPlayerIndex, room.lastMakerIndex);
+            // Store new maker index for next time
+            room.lastMakerIndex = room.game.makerIndex;
+        } else {
+            room.game = new GameClass(roomId, room.players, startingPlayerIndex);
+        }
 
         // Broadcast initial state
-        // We also send it in game_start to avoid race conditions with checking/loading scripts
         const initialState = room.game.getState();
 
         // Notify players of start and assignment
@@ -83,10 +104,10 @@ class GameManager {
             });
         });
 
-        // Also emit standard state event for good measure (or existing listeners)
-        room.game.emitState();
-        // Emit current score on start too
-        this.io.to(roomId).emit('score_update', room.scores);
+        setTimeout(() => {
+            room.game.emitState(); // Ensure state is emitted after start
+            this.io.to(roomId).emit('score_update', room.scores);
+        }, 0);
     }
 
     handleMove(socket, data) {
@@ -118,9 +139,30 @@ class GameManager {
         const room = this.rooms.get(roomId);
         if (!room) return;
 
-        // For simplicity, if one person clicks play again, we restart for both immediately.
         console.log(`Restarting game in room ${roomId}`);
-        this.startGame(roomId);
+
+        let nextStarter = 0;
+
+        // Logic:
+        // If Hangman -> Alternating start
+        // Else -> Winner starts (or swap on draw)
+
+        if (room.type === 'hangman') {
+            nextStarter = 1 - (room.lastStarterIndex || 0);
+        } else {
+            if (room.game && room.game.isGameOver) {
+                if (room.game.winner !== 'draw' && room.game.winner !== null) {
+                    nextStarter = room.game.winner;
+                } else {
+                    // Draw: Swap from who started LAST time
+                    nextStarter = 1 - (room.lastStarterIndex || 0);
+                }
+            } else {
+                nextStarter = 1 - (room.lastStarterIndex || 0);
+            }
+        }
+
+        this.startGame(roomId, nextStarter);
     }
 
     handleDisconnect(socket) {

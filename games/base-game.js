@@ -1,9 +1,9 @@
 class BaseGame {
-    constructor(id, players) {
+    constructor(id, players, startingPlayerIndex = 0) {
         this.id = id;
         this.players = players; // Array of socket objects
         this.gameState = {};
-        this.activePlayerIndex = 0; // 0 or 1
+        this.activePlayerIndex = startingPlayerIndex; // 0 or 1
         this.isGameOver = false;
         this.winner = null;
     }
