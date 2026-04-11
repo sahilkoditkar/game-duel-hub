@@ -1,5 +1,9 @@
 function initBattleship(socket, container, roomId, playerIndex, initialState) {
+    const oldStyle = document.getElementById('battleship-styles');
+    if (oldStyle) oldStyle.remove();
+
     const style = document.createElement('style');
+    style.id = 'battleship-styles';
     style.innerHTML = `
         .bs-container {
             display: flex;
@@ -7,6 +11,7 @@ function initBattleship(socket, container, roomId, playerIndex, initialState) {
             gap: 20px;
             align-items: center;
             width: 100%;
+            user-select: none;
         }
         .bs-grid-container {
             display: flex;
@@ -25,27 +30,32 @@ function initBattleship(socket, container, roomId, playerIndex, initialState) {
             background: #000;
             border: 2px solid #555;
             width: 100%;
-            max-width: 300px;
+            max-width: min(95vw, 350px);
             aspect-ratio: 1;
         }
         .bs-cell {
-            background: #222; /* Water */
+            background: #222;
             width: 100%;
             height: 100%;
             cursor: default;
             transition: background 0.2s;
+            touch-action: manipulation;
         }
-        
+
         /* Interactive Target Grid */
         .target-grid .bs-cell { cursor: pointer; }
-        .target-grid .bs-cell:hover:not(.hit):not(.miss) { background: #333; }
 
         /* Cell States */
-        .bs-cell.ship { background: #666; } /* My Ship */
-        .bs-cell.hit { background: #d32f2f; } /* Hit! */
-        .bs-cell.miss { background: #fff; opacity: 0.5; } /* Miss */
-        
-        /* Mobile: If huge screen, maybe side-by-side, but vertical is safer for mobile first */
+        .bs-cell.ship { background: #666; }
+        .bs-cell.hit { background: #d32f2f; animation: cellPop 0.3s ease-out; }
+        .bs-cell.miss { background: #fff; opacity: 0.5; animation: fadeIn 0.3s; }
+
+        @media (hover: hover) {
+            .target-grid .bs-cell:hover:not(.hit):not(.miss) { background: #333; }
+        }
+
+        .target-grid .bs-cell:active:not(.hit):not(.miss) { background: #444; }
+
         @media (min-width: 768px) {
             .bs-container {
                 flex-direction: row;
@@ -63,7 +73,7 @@ function initBattleship(socket, container, roomId, playerIndex, initialState) {
                 <div class="bs-grid-title">Top: Target Grid (Fire Here)</div>
                 <div id="target-grid" class="bs-grid target-grid"></div>
             </div>
-            
+
             <div class="bs-grid-container">
                 <div class="bs-grid-title">Bottom: My Ships</div>
                 <div id="my-grid" class="bs-grid"></div>
@@ -118,24 +128,19 @@ function initBattleship(socket, container, roomId, playerIndex, initialState) {
                 const cell = document.createElement('div');
                 cell.className = 'bs-cell';
 
-                // Helper to set class based on val
-                // 0: Water, 1: Ship, 2: Miss, 3: Hit
-
                 if (cellVal === 2) {
                     cell.classList.add('miss');
                 } else if (cellVal === 3) {
                     cell.classList.add('hit');
                 } else if (cellVal === 1) {
-                    // Only show ship if it's NOT target grid
                     if (!isTarget) {
                         cell.classList.add('ship');
                     }
                 }
 
-                // Click handler for Target
                 if (isTarget) {
                     cell.addEventListener('click', () => {
-                        if (cellVal === 2 || cellVal === 3) return; // Already shot
+                        if (cellVal === 2 || cellVal === 3) return;
                         socket.emit('make_move', { roomId, move: { row: r, col: c } });
                     });
                 }

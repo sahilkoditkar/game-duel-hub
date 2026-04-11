@@ -1,67 +1,91 @@
 function initDotsAndBoxes(socket, container, roomId, playerIndex, initialState) {
+    // Remove old styles on re-init
+    const oldStyle = document.getElementById('dotsandboxes-styles');
+    if (oldStyle) oldStyle.remove();
+
     const style = document.createElement('style');
+    style.id = 'dotsandboxes-styles';
     style.innerHTML = `
         .db-board {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            display: grid;
+            grid-template-columns: auto 1fr auto 1fr auto 1fr auto;
+            grid-template-rows: auto 1fr auto 1fr auto 1fr auto;
+            max-width: min(90vw, 350px);
+            width: 100%;
             margin: 20px auto;
             user-select: none;
-        }
-        .db-row {
-            display: flex;
+            aspect-ratio: 1;
         }
         .dot {
-            width: 10px;
-            height: 10px;
+            width: clamp(8px, 2.5vw, 14px);
+            height: clamp(8px, 2.5vw, 14px);
             background: #fff;
             border-radius: 50%;
             z-index: 2;
+            place-self: center;
         }
         .hline {
-            width: 60px;
-            height: 10px;
             background: #333;
-            margin: 0 2px;
             cursor: pointer;
+            height: clamp(6px, 1.5vw, 12px);
+            place-self: center stretch;
+            border-radius: 3px;
             position: relative;
+            transition: background 0.2s;
+            touch-action: manipulation;
+        }
+        .hline::before {
+            content: '';
+            position: absolute;
+            top: -14px;
+            bottom: -14px;
+            left: 0;
+            right: 0;
         }
         .hline.taken { cursor: default; }
-        .hline:hover:not(.taken) { background: #555; }
-        
-        .vline-row {
-            display: flex;
-        }
+        .hline:not(.taken):active { background: #666; }
+
         .vline {
-            width: 10px;
-            height: 60px;
             background: #333;
-            margin: 2px 0;
             cursor: pointer;
-            margin-right: 64px; /* Space for box */
+            width: clamp(6px, 1.5vw, 12px);
+            place-self: stretch center;
+            border-radius: 3px;
+            position: relative;
+            transition: background 0.2s;
+            touch-action: manipulation;
         }
-        .vline:last-child { margin-right: 0; }
+        .vline::before {
+            content: '';
+            position: absolute;
+            left: -14px;
+            right: -14px;
+            top: 0;
+            bottom: 0;
+        }
         .vline.taken { cursor: default; }
-        .vline:hover:not(.taken) { background: #555; }
+        .vline:not(.taken):active { background: #666; }
 
         .box {
-            width: 60px;
-            height: 60px;
-            margin-top: 2px;
-            margin-left: -62px; /* Pull back into gap */
-            margin-right: 2px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 1.5rem;
+            font-size: clamp(1rem, 3vw, 1.5rem);
             color: #000;
+            border-radius: 4px;
+            transition: background 0.3s;
         }
-        
+
         .p0-bg { background-color: var(--primary-color) !important; }
         .p1-bg { background-color: var(--secondary-color) !important; }
         .p0-text { color: var(--primary-color) !important; }
         .p1-text { color: var(--secondary-color) !important; }
+
+        @media (hover: hover) {
+            .hline:not(.taken):hover { background: #555; }
+            .vline:not(.taken):hover { background: #555; }
+        }
     `;
     document.head.appendChild(style);
 
@@ -80,33 +104,34 @@ function initDotsAndBoxes(socket, container, roomId, playerIndex, initialState) 
     const score1El = document.getElementById('s-p1');
     const myIdx = playerIndex;
 
-    // Build the grid
-    // 4 rows of dots, 3 rows of boxes
-    // Row 0: Dots + H-lines
-    // Row 0-1 Gap: V-lines + Boxes
-
+    // Build the CSS Grid board
+    // 7 rows, 7 cols: dots at even positions, lines/boxes at odd positions
     let html = '';
-    for (let r = 0; r < 4; r++) {
-        // Dots and Horizontal Lines
-        html += '<div class="db-row">';
-        for (let c = 0; c < 4; c++) {
-            html += '<div class="dot"></div>';
-            if (c < 3) {
-                html += `<div class="hline" data-r="${r}" data-c="${c}"></div>`;
-            }
-        }
-        html += '</div>';
+    for (let r = 0; r < 7; r++) {
+        for (let c = 0; c < 7; c++) {
+            const gridRow = r + 1;
+            const gridCol = c + 1;
+            const posStyle = `grid-row:${gridRow};grid-column:${gridCol};`;
 
-        // Vertical Lines and Boxes (only if not last row of dots)
-        if (r < 3) {
-            html += '<div class="db-row">';
-            for (let c = 0; c < 4; c++) {
-                html += `<div class="vline" data-r="${r}" data-c="${c}"></div>`;
-                if (c < 3) {
-                    html += `<div class="box" id="box-${r}-${c}"></div>`;
-                }
+            if (r % 2 === 0 && c % 2 === 0) {
+                // Dot
+                html += `<div class="dot" style="${posStyle}"></div>`;
+            } else if (r % 2 === 0 && c % 2 === 1) {
+                // Horizontal line
+                const lr = r / 2;
+                const lc = (c - 1) / 2;
+                html += `<div class="hline" data-r="${lr}" data-c="${lc}" style="${posStyle}"></div>`;
+            } else if (r % 2 === 1 && c % 2 === 0) {
+                // Vertical line
+                const lr = (r - 1) / 2;
+                const lc = c / 2;
+                html += `<div class="vline" data-r="${lr}" data-c="${lc}" style="${posStyle}"></div>`;
+            } else {
+                // Box (both odd)
+                const br = (r - 1) / 2;
+                const bc = (c - 1) / 2;
+                html += `<div class="box" id="box-${br}-${bc}" style="${posStyle}"></div>`;
             }
-            html += '</div>';
         }
     }
     boardEl.innerHTML = html;
@@ -195,7 +220,6 @@ function initDotsAndBoxes(socket, container, roomId, playerIndex, initialState) 
                     const box = document.getElementById(`box-${r}-${c}`);
                     if (box) {
                         box.classList.add(owner === 0 ? 'p0-bg' : 'p1-bg');
-                        // box.textContent = owner === 0 ? 'P1' : 'P2';
                     }
                 }
             });

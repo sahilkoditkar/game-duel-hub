@@ -13,6 +13,7 @@
     margin: 0;
     padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -22,13 +23,32 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    min-height: 100dvh;
+    overscroll-behavior-y: contain;
+}
+
+body.in-game {
+    overscroll-behavior: none;
+    align-items: flex-start;
+    padding-top: 10px;
 }
 
 .container {
     width: 100%;
     max-width: 600px;
     padding: 10px;
-    /* Reduced padding for mobile */
+}
+
+@media (min-width: 768px) {
+    .container {
+        max-width: 700px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .container {
+        max-width: 800px;
+    }
 }
 
 /* Mobile adjustments */
@@ -64,6 +84,23 @@ body {
     /* Controls are now in modal */
 }
 
+/* Landscape phone handling */
+@media (orientation: landscape) and (max-height: 500px) {
+    header {
+        margin-bottom: 15px;
+    }
+
+    .card {
+        padding: 15px;
+        margin-bottom: 10px;
+    }
+
+    #game-area {
+        padding: 10px;
+        min-height: 200px;
+    }
+}
+
 /* Modal Styles */
 .modal {
     position: fixed;
@@ -88,6 +125,15 @@ body {
     animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     max-width: 90%;
     width: 400px;
+    max-height: 90vh;
+    max-height: 90dvh;
+    overflow-y: auto;
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        padding: 24px;
+    }
 }
 
 @keyframes popIn {
@@ -102,8 +148,19 @@ body {
     }
 }
 
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes cellPop {
+    0% { transform: scale(0); }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
 #modal-message {
-    font-size: 2rem;
+    font-size: clamp(1.4rem, 4vw, 2rem);
     margin-bottom: 30px;
     color: var(--text-color);
 }
@@ -162,6 +219,7 @@ select {
     color: var(--text-color);
     font-size: 1rem;
     outline: none;
+    touch-action: manipulation;
 }
 
 input:focus,
@@ -177,11 +235,22 @@ select:focus {
     font-size: 1rem;
     cursor: pointer;
     font-weight: bold;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s, transform 0.1s;
+    touch-action: manipulation;
 }
 
 .btn:hover {
     opacity: 0.9;
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+@media (hover: none) {
+    .btn:hover {
+        opacity: 1;
+    }
 }
 
 .primary {
@@ -230,6 +299,7 @@ select:focus {
     border-radius: var(--border-radius);
     min-height: 300px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
