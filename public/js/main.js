@@ -1,5 +1,21 @@
 const socket = io();
 
+// Game init function registry
+const GAME_INIT = {
+    tictactoe: 'initTicTacToe',
+    dotsandboxes: 'initDotsAndBoxes',
+    bingo: 'initBingo',
+    battleship: 'initBattleship',
+    hangman: 'initHangman',
+    mastermind: 'initMastermind',
+    connectfour: 'initConnectFour',
+    nim: 'initNim',
+    memory: 'initMemory',
+    wordchain: 'initWordChain',
+    reversi: 'initReversi',
+    checkers: 'initCheckers'
+};
+
 // UI Elements
 const lobbyView = document.getElementById('lobby-view');
 const gameContainer = document.getElementById('game-container');
@@ -77,45 +93,17 @@ socket.on('game_start', (data) => {
     showStatus('Game Starting...');
     modal.classList.add('hidden'); // Ensure modal is closed
 
-    // Load game specific script or init game
-    if (data.gameType === 'dotsandboxes') {
-        if (typeof initDotsAndBoxes === 'function') {
-            initDotsAndBoxes(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
-        } else {
-            loadGameScript('dotsandboxes', data);
-        }
-    } else if (data.gameType === 'bingo') {
-        if (typeof initBingo === 'function') {
-            initBingo(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
-        } else {
-            loadGameScript('bingo', data);
-        }
-    } else if (data.gameType === 'battleship') {
-        if (typeof initBattleship === 'function') {
-            initBattleship(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
-        } else {
-            loadGameScript('battleship', data);
-        }
-    } else if (data.gameType === 'hangman') {
-        if (typeof initHangman === 'function') {
-            initHangman(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
-        } else {
-            loadGameScript('hangman', data);
-        }
-    } else if (data.gameType === 'mastermind') {
-        if (typeof initMastermind === 'function') {
-            initMastermind(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
-        } else {
-            loadGameScript('mastermind', data);
-        }
+    const initFn = GAME_INIT[data.gameType];
+    if (!initFn) {
+        gameArea.innerHTML = '<p>Unknown game type</p>';
+        return;
+    }
+
+    if (typeof window[initFn] === 'function') {
+        window[initFn](socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
     } else {
-        // Default TicTacToe
-        if (typeof initTicTacToe === 'function') {
-            initTicTacToe(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
-        } else {
-            gameArea.innerHTML = '<p>Loading game...</p>';
-            loadGameScript('tictactoe', data);
-        }
+        gameArea.innerHTML = '<p>Loading game...</p>';
+        loadGameScript(data.gameType, data);
     }
 });
 
@@ -128,6 +116,7 @@ function enterGameView(roomId) {
     lobbyView.classList.add('hidden');
     gameContainer.classList.remove('hidden');
     currentRoomIdSpan.textContent = roomId;
+    document.body.classList.add('in-game');
 }
 
 function showStatus(msg) {
@@ -146,18 +135,9 @@ function loadGameScript(gameType, data) {
     const script = document.createElement('script');
     script.src = `js/games/${gameType}-client.js`;
     script.onload = () => {
-        if (gameType === 'dotsandboxes' && typeof initDotsAndBoxes === 'function') {
-            initDotsAndBoxes(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
-        } else if (gameType === 'bingo' && typeof initBingo === 'function') {
-            initBingo(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
-        } else if (gameType === 'battleship' && typeof initBattleship === 'function') {
-            initBattleship(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
-        } else if (gameType === 'hangman' && typeof initHangman === 'function') {
-            initHangman(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
-        } else if (gameType === 'mastermind' && typeof initMastermind === 'function') {
-            initMastermind(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
-        } else if (typeof initTicTacToe === 'function') {
-            initTicTacToe(socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
+        const initFn = GAME_INIT[gameType];
+        if (initFn && typeof window[initFn] === 'function') {
+            window[initFn](socket, gameArea, currentRoomId, data.playerIndex, data.initialState);
         }
     };
     document.body.appendChild(script);

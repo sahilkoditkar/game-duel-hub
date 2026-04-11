@@ -1,5 +1,21 @@
 const { v4: uuidv4 } = require('uuid');
 
+// Game registry - add new games here
+const GAME_REGISTRY = {
+    tictactoe: { module: './games/tictactoe' },
+    dotsandboxes: { module: './games/dotsandboxes' },
+    bingo: { module: './games/bingo' },
+    battleship: { module: './games/battleship' },
+    hangman: { module: './games/hangman', special: 'hangman' },
+    mastermind: { module: './games/mastermind', special: 'mastermind' },
+    connectfour: { module: './games/connectfour' },
+    nim: { module: './games/nim' },
+    memory: { module: './games/memory' },
+    wordchain: { module: './games/wordchain', special: 'wordchain' },
+    reversi: { module: './games/reversi' },
+    checkers: { module: './games/checkers' }
+};
+
 class GameManager {
     constructor(io) {
         this.io = io;
@@ -11,7 +27,6 @@ class GameManager {
         this.rooms.set(roomId, {
             players: [socket],
             game: null,
-            type: gameType,
             type: gameType,
             status: 'waiting',
             scores: [0, 0] // [p1, p2]
@@ -45,7 +60,7 @@ class GameManager {
 
         console.log(`User ${socket.id} joined room ${roomId}`);
 
-        // Default TicTacToe
+        // Start game
         this.startGame(roomId, 0);
     }
 
@@ -58,35 +73,24 @@ class GameManager {
         // Store who started this game
         room.lastStarterIndex = startingPlayerIndex;
 
-        let GameClass;
-        if (room.type === 'tictactoe') {
-            GameClass = require('./games/tictactoe');
-        } else if (room.type === 'dotsandboxes') {
-            GameClass = require('./games/dotsandboxes');
-        } else if (room.type === 'bingo') {
-            GameClass = require('./games/bingo');
-        } else if (room.type === 'battleship') {
-            GameClass = require('./games/battleship');
-        } else if (room.type === 'hangman') {
-            GameClass = require('./games/hangman');
-            // Ensure usedWords exists
-            if (!room.usedWords) room.usedWords = [];
-        } else if (room.type === 'mastermind') {
-            GameClass = require('./games/mastermind');
-        } else {
+        const entry = GAME_REGISTRY[room.type];
+        if (!entry) {
             console.error('Unknown game type:', room.type);
             return;
         }
 
-        // Special Constructor handling
-        if (room.type === 'hangman') {
+        const GameClass = require(entry.module);
+
+        // Special constructor handling
+        if (entry.special === 'hangman') {
+            if (!room.usedWords) room.usedWords = [];
             room.game = new GameClass(roomId, room.players, startingPlayerIndex, room.usedWords);
             if (room.game.word) room.usedWords.push(room.game.word);
-        } else if (room.type === 'mastermind') {
-            // Pass lastMakerIndex if exists
+        } else if (entry.special === 'mastermind') {
             room.game = new GameClass(roomId, room.players, startingPlayerIndex, room.lastMakerIndex);
-            // Store new maker index for next time
             room.lastMakerIndex = room.game.makerIndex;
+        } else if (entry.special === 'wordchain') {
+            room.game = new GameClass(roomId, room.players, startingPlayerIndex, this.io);
         } else {
             room.game = new GameClass(roomId, room.players, startingPlayerIndex);
         }
@@ -143,10 +147,6 @@ class GameManager {
 
         let nextStarter = 0;
 
-        // Logic:
-        // If Hangman -> Alternating start
-        // Else -> Winner starts (or swap on draw)
-
         if (room.type === 'hangman') {
             nextStarter = 1 - (room.lastStarterIndex || 0);
         } else {
@@ -154,7 +154,6 @@ class GameManager {
                 if (room.game.winner !== 'draw' && room.game.winner !== null) {
                     nextStarter = room.game.winner;
                 } else {
-                    // Draw: Swap from who started LAST time
                     nextStarter = 1 - (room.lastStarterIndex || 0);
                 }
             } else {
@@ -172,6 +171,11 @@ class GameManager {
             if (index !== -1) {
                 room.players.splice(index, 1);
                 this.io.to(roomId).emit('player_left', { playerId: socket.id });
+
+                // Clean up timer for wordchain
+                if (room.game && room.game.cleanup) {
+                    room.game.cleanup();
+                }
 
                 // End game if running
                 if (room.game) {

@@ -1,5 +1,9 @@
 function initBingo(socket, container, roomId, playerIndex, initialState) {
+    const oldStyle = document.getElementById('bingo-styles');
+    if (oldStyle) oldStyle.remove();
+
     const style = document.createElement('style');
+    style.id = 'bingo-styles';
     style.innerHTML = `
         .bingo-board {
             display: grid;
@@ -15,20 +19,22 @@ function initBingo(socket, container, roomId, playerIndex, initialState) {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: clamp(0.9rem, 3vw, 1.2rem);
             cursor: pointer;
             border-radius: 4px;
             user-select: none;
             color: #fff;
-            transition: background 0.2s;
-        }
-        .bingo-cell:hover:not(.marked) {
-            background: #444;
+            transition: background 0.3s, transform 0.2s;
+            touch-action: manipulation;
         }
         .bingo-cell.marked {
             background: var(--primary-color);
             color: #000;
             font-weight: bold;
+            animation: cellPop 0.3s ease-out;
+        }
+        .bingo-cell:active:not(.marked) {
+            transform: scale(0.95);
         }
         .bingo-letters {
             display: flex;
@@ -42,6 +48,11 @@ function initBingo(socket, container, roomId, playerIndex, initialState) {
         .bingo-letter.active {
             color: var(--primary-color);
             text-shadow: 0 0 10px var(--primary-color);
+        }
+        @media (hover: hover) {
+            .bingo-cell:hover:not(.marked) {
+                background: #444;
+            }
         }
     `;
     document.head.appendChild(style);

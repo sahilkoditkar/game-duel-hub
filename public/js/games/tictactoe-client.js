@@ -1,36 +1,40 @@
 function initTicTacToe(socket, container, roomId, playerIndex, initialState) {
-    // Basic shared styles should be in style.css or injected
-    // Inject CSS for grid
+    const oldStyle = document.getElementById('tictactoe-styles');
+    if (oldStyle) oldStyle.remove();
+
     const style = document.createElement('style');
+    style.id = 'tictactoe-styles';
     style.innerHTML = `
         .ttt-board {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             margin: 20px auto;
-            max-width: 350px; /* Constrain max size */
+            max-width: 350px;
             width: 100%;
         }
         .ttt-cell {
-            aspect-ratio: 1; /* Keep square */
+            aspect-ratio: 1;
             background: #333;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: clamp(2rem, 5vw, 3rem); /* Responsive font */
+            font-size: clamp(2rem, 5vw, 3rem);
             cursor: pointer;
             border-radius: 8px;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            transition: background 0.15s, transform 0.15s;
         }
-        .ttt-cell:hover {
-            background: #444;
+        .ttt-cell:active {
+            transform: scale(0.95);
         }
-        /* Mobile touch optimization */
-        @media (hover: none) {
+        @media (hover: hover) {
             .ttt-cell:hover {
-                background: #333; /* Disable hover on touch to prevent sticky hover */
+                background: #444;
             }
+        }
+        @media (hover: none) {
             .ttt-cell:active {
                 background: #444;
             }
@@ -90,11 +94,11 @@ function initTicTacToe(socket, container, roomId, playerIndex, initialState) {
         if (isGameOver) {
             if (winner === 'draw') {
                 statusEl.textContent = "It's a Draw!";
-                showStatus("It's a Draw!"); // Trigger button visibility in main.js
+                showStatus("It's a Draw!");
             } else {
                 const msg = winner === myPlayerIndex ? "You Won!" : "You Lost!";
                 statusEl.textContent = msg;
-                showStatus(msg); // Trigger button visibility in main.js
+                showStatus(msg);
             }
         } else {
             statusEl.textContent = activePlayerIndex === myPlayerIndex ? "Your Turn" : "Opponent's Turn";
