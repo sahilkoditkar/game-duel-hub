@@ -18,7 +18,7 @@ class Mastermind extends BaseGame {
         this.secretCode = []; // [1, 2, 3, 4]
         this.phase = 'SETUP'; // SETUP -> PLAYING
         this.guesses = []; // { code: [], feedback: [] }
-        this.maxAttempts = 10;
+        this.maxAttempts = 4;
 
         this.scores = [0, 0];
         this.isGameOver = false;

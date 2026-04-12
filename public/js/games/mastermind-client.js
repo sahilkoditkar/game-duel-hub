@@ -119,6 +119,22 @@ function initMastermind(socket, gameArea, roomId, playerIndex, initialState) {
              color: #fbbf24;
              text-align: center;
         }
+        .mm-attempts {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 10px 20px;
+            background: #1e293b;
+            border-radius: 8px;
+            border: 2px solid #334155;
+        }
+        .mm-attempts .label { color: #94a3b8; }
+        .mm-attempts .count { color: var(--secondary-color); font-size: 1.4rem; }
+        .mm-attempts.warning .count { color: #fbbf24; }
+        .mm-attempts.danger .count { color: #ef4444; animation: pulse 0.8s infinite alternate; }
         @media (hover: hover) {
             .mm-key:hover { background: #2563eb; }
         }
@@ -130,6 +146,12 @@ function initMastermind(socket, gameArea, roomId, playerIndex, initialState) {
         <div class="mm-container">
             <h3 id="role-display">Role: ...</h3>
             <div id="mm-status" class="mm-status">Waiting...</div>
+
+            <div id="mm-attempts" class="mm-attempts" style="display:none;">
+                <span class="label">Attempts left:</span>
+                <span class="count" id="mm-attempts-count">4</span>
+                <span class="label">/ <span id="mm-attempts-max">4</span></span>
+            </div>
 
             <div id="secret-display" class="mm-secret-display">
                  <div>Secret Code:</div>
@@ -204,6 +226,9 @@ function initMastermind(socket, gameArea, roomId, playerIndex, initialState) {
     const inputSlots = document.querySelectorAll('#input-display .mm-slot');
     const submitBtn = document.getElementById('submit-btn');
     const controlsDiv = document.getElementById('mm-controls');
+    const attemptsBox = document.getElementById('mm-attempts');
+    const attemptsCount = document.getElementById('mm-attempts-count');
+    const attemptsMax = document.getElementById('mm-attempts-max');
 
     function renderInput() {
         inputSlots.forEach((slot, i) => {
@@ -242,13 +267,25 @@ function initMastermind(socket, gameArea, roomId, playerIndex, initialState) {
                 statusEl.textContent = "Opponent is setting the secret code...";
                 controlsDiv.style.display = 'none';
             }
+            attemptsBox.style.display = 'none';
         } else {
+            // Show attempt counter during play
+            const used = state.guesses.length;
+            const max = state.maxAttempts || 4;
+            const remaining = max - used;
+            attemptsBox.style.display = 'flex';
+            attemptsCount.textContent = remaining;
+            attemptsMax.textContent = max;
+            attemptsBox.className = 'mm-attempts';
+            if (remaining <= 1) attemptsBox.classList.add('danger');
+            else if (remaining <= 2) attemptsBox.classList.add('warning');
+
             if (isBreaker) {
-                statusEl.textContent = myTurn ? "Your turn to guess!" : "Waiting...";
+                statusEl.textContent = myTurn ? `Your turn - ${remaining} guess${remaining === 1 ? '' : 'es'} left!` : "Waiting...";
                 controlsDiv.style.display = 'flex';
                 submitBtn.textContent = "Submit Guess";
             } else {
-                statusEl.textContent = "Opponent is guessing...";
+                statusEl.textContent = `Opponent guessing (${remaining} left)`;
                 controlsDiv.style.display = 'none';
             }
         }

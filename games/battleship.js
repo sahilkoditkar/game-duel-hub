@@ -67,23 +67,39 @@ class Battleship extends BaseGame {
     }
 
     placeRandomShips(playerIndex) {
-        const grid = this.grids[playerIndex];
+        // Retry the entire layout if any ship fails to place, since
+        // a partial layout could leave a ship missing.
+        for (let attempt = 0; attempt < 20; attempt++) {
+            const grid = this.createGrid();
+            let allPlaced = true;
 
-        this.shipsToPlace.forEach(size => {
-            let placed = false;
-            let attempts = 0;
-            while (!placed && attempts < 100) {
-                const horizontal = Math.random() < 0.5;
-                const row = Math.floor(Math.random() * 10);
-                const col = Math.floor(Math.random() * 10);
+            for (const size of this.shipsToPlace) {
+                let placed = false;
+                for (let i = 0; i < 200; i++) {
+                    const horizontal = Math.random() < 0.5;
+                    const row = Math.floor(Math.random() * 10);
+                    const col = Math.floor(Math.random() * 10);
 
-                if (this.canPlace(grid, row, col, size, horizontal)) {
-                    this.placeShip(grid, row, col, size, horizontal);
-                    placed = true;
+                    if (this.canPlace(grid, row, col, size, horizontal)) {
+                        this.placeShip(grid, row, col, size, horizontal);
+                        placed = true;
+                        break;
+                    }
                 }
-                attempts++;
+                if (!placed) {
+                    allPlaced = false;
+                    break;
+                }
             }
-        });
+
+            if (allPlaced) {
+                this.grids[playerIndex] = grid;
+                return;
+            }
+        }
+
+        // Should be statistically impossible with these ship sizes on a 10x10 board
+        console.error('Battleship: failed to place all ships after 20 layout attempts');
     }
 
     canPlace(grid, row, col, size, horizontal) {
