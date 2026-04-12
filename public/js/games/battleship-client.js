@@ -34,27 +34,80 @@ function initBattleship(socket, container, roomId, playerIndex, initialState) {
             aspect-ratio: 1;
         }
         .bs-cell {
-            background: #222;
+            background: #0c4a6e; /* Deep blue water */
             width: 100%;
             height: 100%;
             cursor: default;
             transition: background 0.2s;
             touch-action: manipulation;
+            position: relative;
         }
 
         /* Interactive Target Grid */
         .target-grid .bs-cell { cursor: pointer; }
 
-        /* Cell States */
-        .bs-cell.ship { background: #666; }
-        .bs-cell.hit { background: #d32f2f; animation: cellPop 0.3s ease-out; }
-        .bs-cell.miss { background: #fff; opacity: 0.5; animation: fadeIn 0.3s; }
-
-        @media (hover: hover) {
-            .target-grid .bs-cell:hover:not(.hit):not(.miss) { background: #333; }
+        /* Cell States - distinct colors */
+        .bs-cell.ship {
+            background: #64748b; /* Gray ship */
+            border: 1px solid #94a3b8;
+        }
+        .bs-cell.hit {
+            background: #dc2626; /* Bright red */
+            animation: cellPop 0.3s ease-out;
+        }
+        .bs-cell.hit::after {
+            content: '\u2716'; /* X mark */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: clamp(0.6rem, 2vw, 1rem);
+            font-weight: bold;
+        }
+        .bs-cell.miss {
+            background: #93c5fd; /* Light cyan/blue */
+            animation: fadeIn 0.3s;
+        }
+        .bs-cell.miss::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 30%;
+            height: 30%;
+            background: #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.85;
         }
 
-        .target-grid .bs-cell:active:not(.hit):not(.miss) { background: #444; }
+        @media (hover: hover) {
+            .target-grid .bs-cell:hover:not(.hit):not(.miss) { background: #155e8a; }
+        }
+
+        .target-grid .bs-cell:active:not(.hit):not(.miss) { background: #1e7ba8; }
+
+        .bs-legend {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+        .bs-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .bs-legend-swatch {
+            width: 14px;
+            height: 14px;
+            border-radius: 2px;
+            border: 1px solid #555;
+        }
 
         @media (min-width: 768px) {
             .bs-container {
@@ -70,13 +123,20 @@ function initBattleship(socket, container, roomId, playerIndex, initialState) {
         <h3 id="game-status">Game Started</h3>
         <div class="bs-container">
             <div class="bs-grid-container">
-                <div class="bs-grid-title">Top: Target Grid (Fire Here)</div>
+                <div class="bs-grid-title">Target Grid (Fire Here)</div>
                 <div id="target-grid" class="bs-grid target-grid"></div>
             </div>
 
             <div class="bs-grid-container">
-                <div class="bs-grid-title">Bottom: My Ships</div>
+                <div class="bs-grid-title">My Ships</div>
                 <div id="my-grid" class="bs-grid"></div>
+            </div>
+
+            <div class="bs-legend">
+                <div class="bs-legend-item"><span class="bs-legend-swatch" style="background:#0c4a6e"></span>Water</div>
+                <div class="bs-legend-item"><span class="bs-legend-swatch" style="background:#64748b"></span>Ship</div>
+                <div class="bs-legend-item"><span class="bs-legend-swatch" style="background:#dc2626"></span>Hit</div>
+                <div class="bs-legend-item"><span class="bs-legend-swatch" style="background:#93c5fd"></span>Miss</div>
             </div>
         </div>
     `;
