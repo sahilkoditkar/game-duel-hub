@@ -21,7 +21,9 @@ class Hangman extends BaseGame {
 
         this.word = availableWords[Math.floor(Math.random() * availableWords.length)];
         this.guessedLetters = [];
-        this.lives = 6;
+        // Each player has their own lives pool now (was shared)
+        this.maxLives = 6;
+        this.lives = [this.maxLives, this.maxLives];
         this.scores = [0, 0]; // Points for correct letters
         this.isGameOver = false;
         this.winner = null;
@@ -58,16 +60,22 @@ class Hangman extends BaseGame {
             hit = true;
             this.scores[playerIndex] += count; // 1 point per occurrence
         } else {
-            this.lives--;
+            // Only the guessing player loses a life
+            this.lives[playerIndex]--;
         }
 
         this.checkWin();
 
         // Streak Mechanic:
         // Hit = Play again (activePlayerIndex stays same)
-        // Miss = Switch turn
+        // Miss = Switch turn (unless other player is also out of lives)
         if (!hit && !this.isGameOver) {
-            this.activePlayerIndex = 1 - this.activePlayerIndex;
+            const otherPlayer = 1 - this.activePlayerIndex;
+            // Only switch if other player still has lives
+            if (this.lives[otherPlayer] > 0) {
+                this.activePlayerIndex = otherPlayer;
+            }
+            // If both run out, checkWin will end the game
         }
 
         this.emitState();
@@ -88,16 +96,27 @@ class Hangman extends BaseGame {
             } else {
                 this.winner = 'draw';
             }
-        } else if (this.lives <= 0) {
+            return;
+        }
+
+        // If a player runs out of lives, they're eliminated
+        const p0Out = this.lives[0] <= 0;
+        const p1Out = this.lives[1] <= 0;
+
+        if (p0Out && p1Out) {
+            // Both eliminated - decide by score
             this.isGameOver = true;
-            // Lives ran out: Decide by score
-            if (this.scores[0] > this.scores[1]) {
-                this.winner = 0;
-            } else if (this.scores[1] > this.scores[0]) {
-                this.winner = 1;
-            } else {
-                this.winner = 'draw';
-            }
+            if (this.scores[0] > this.scores[1]) this.winner = 0;
+            else if (this.scores[1] > this.scores[0]) this.winner = 1;
+            else this.winner = 'draw';
+        } else if (p0Out) {
+            // Player 0 eliminated, player 1 wins
+            this.isGameOver = true;
+            this.winner = 1;
+        } else if (p1Out) {
+            // Player 1 eliminated, player 0 wins
+            this.isGameOver = true;
+            this.winner = 0;
         }
     }
 

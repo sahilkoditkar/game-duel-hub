@@ -7,7 +7,10 @@ function initHangman(socket, gameArea, roomId, playerIndex, initialState) {
     gameArea.innerHTML = `
         <div class="hangman-container">
             <div class="stats-bar">
-                <div class="stat-box">Lives: <span id="lives-count">${gameState.lives || 6}</span></div>
+                <div class="stat-box">My Lives: <span id="my-lives" class="hm-lives">6</span></div>
+                <div class="stat-box">Opp Lives: <span id="opp-lives" class="hm-lives">6</span></div>
+            </div>
+            <div class="stats-bar">
                 <div class="stat-box">My Score: <span id="hm-my-score">0</span></div>
                 <div class="stat-box">Opp Score: <span id="hm-opp-score">0</span></div>
             </div>
@@ -29,7 +32,8 @@ function initHangman(socket, gameArea, roomId, playerIndex, initialState) {
     const wordDisplay = document.getElementById('word-display');
     const revealArea = document.getElementById('reveal-area');
     const keyboard = document.getElementById('keyboard');
-    const livesCount = document.getElementById('lives-count');
+    const myLivesEl = document.getElementById('my-lives');
+    const oppLivesEl = document.getElementById('opp-lives');
     const myScoreEl = document.getElementById('hm-my-score');
     const oppScoreEl = document.getElementById('hm-opp-score');
 
@@ -47,8 +51,14 @@ function initHangman(socket, gameArea, roomId, playerIndex, initialState) {
     function renderState(state) {
         gameState = state;
 
-        // Update Stats
-        livesCount.textContent = state.lives;
+        // Update Stats - per-player lives
+        const lives = state.lives || [6, 6];
+        const myLives = lives[playerIndex];
+        const oppLives = lives[1 - playerIndex];
+        myLivesEl.textContent = '\u2764'.repeat(myLives) || '0';
+        oppLivesEl.textContent = '\u2764'.repeat(oppLives) || '0';
+        myLivesEl.className = 'hm-lives' + (myLives <= 2 ? ' low' : '');
+        oppLivesEl.className = 'hm-lives' + (oppLives <= 2 ? ' low' : '');
 
         // In-game scores
         myScoreEl.textContent = state.scores[playerIndex];
@@ -149,6 +159,14 @@ function initHangman(socket, gameArea, roomId, playerIndex, initialState) {
             color: #e2e8f0;
             flex-wrap: wrap;
             justify-content: center;
+        }
+        .hm-lives {
+            color: #ef4444;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+        }
+        .hm-lives.low {
+            animation: pulse 0.8s infinite alternate;
         }
         .word-display {
             display: flex;

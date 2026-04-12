@@ -37,6 +37,14 @@ function initWordChain(socket, container, roomId, playerIndex, initialState) {
             font-size: 1.3rem;
             text-transform: uppercase;
         }
+        .wc-counts {
+            display: flex;
+            gap: 24px;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        .wc-count-p0 { color: var(--primary-color); }
+        .wc-count-p1 { color: var(--secondary-color); }
         .wc-words {
             width: 100%;
             max-height: clamp(150px, 30vh, 250px);
@@ -116,6 +124,10 @@ function initWordChain(socket, container, roomId, playerIndex, initialState) {
         <div class="wc-container">
             <div class="wc-timer" id="wc-timer">15</div>
             <div class="wc-hint" id="wc-hint">Type any word to start!</div>
+            <div class="wc-counts">
+                <span class="wc-count-p0">You: <span id="wc-c-me">0</span></span>
+                <span class="wc-count-p1">Opp: <span id="wc-c-opp">0</span></span>
+            </div>
             <div class="wc-words" id="wc-words"></div>
             <div class="wc-message" id="wc-message"></div>
             <div class="wc-input-row">
@@ -132,6 +144,8 @@ function initWordChain(socket, container, roomId, playerIndex, initialState) {
     const inputEl = document.getElementById('wc-input');
     const submitEl = document.getElementById('wc-submit');
     const messageEl = document.getElementById('wc-message');
+    const myCountEl = document.getElementById('wc-c-me');
+    const oppCountEl = document.getElementById('wc-c-opp');
     const myIdx = playerIndex;
 
     function submitWord() {
@@ -174,6 +188,7 @@ function initWordChain(socket, container, roomId, playerIndex, initialState) {
 
         // Words list
         wordsEl.innerHTML = '';
+        let myCount = 0, oppCount = 0;
         words.forEach((entry, i) => {
             const div = document.createElement('div');
             div.className = `wc-word p${entry.player}`;
@@ -181,8 +196,12 @@ function initWordChain(socket, container, roomId, playerIndex, initialState) {
             // Highlight last letter
             div.innerHTML = w.slice(0, -1) + `<span class="wc-chain-letter">${w[w.length - 1]}</span>`;
             wordsEl.appendChild(div);
+            if (entry.player === myIdx) myCount++;
+            else oppCount++;
         });
         wordsEl.scrollTop = wordsEl.scrollHeight;
+        myCountEl.textContent = myCount;
+        oppCountEl.textContent = oppCount;
 
         // Input state
         const isMyTurn = activePlayerIndex === myIdx;
