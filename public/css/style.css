@@ -101,49 +101,47 @@ body.in-game {
     }
 }
 
-/* Modal Styles */
+/* Modal Styles - Bottom sheet so board stays visible */
 .modal {
     position: fixed;
-    top: 0;
+    bottom: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.3);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-end;
     z-index: 1000;
-    backdrop-filter: blur(5px);
 }
 
 .modal-content {
     background: var(--card-bg);
-    padding: 40px;
-    border-radius: 16px;
+    padding: 28px 24px;
+    border-radius: 16px 16px 0 0;
     text-align: center;
     border: 1px solid #333;
-    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    max-width: 90%;
-    width: 400px;
-    max-height: 90vh;
-    max-height: 90dvh;
-    overflow-y: auto;
+    border-bottom: none;
+    animation: slideUp 0.35s ease-out;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 480px) {
     .modal-content {
-        padding: 24px;
+        padding: 20px 16px;
     }
 }
 
-@keyframes popIn {
+@keyframes slideUp {
     0% {
-        transform: scale(0.5);
+        transform: translateY(100%);
         opacity: 0;
     }
 
     100% {
-        transform: scale(1);
+        transform: translateY(0);
         opacity: 1;
     }
 }
@@ -160,15 +158,19 @@ body.in-game {
 }
 
 #modal-message {
-    font-size: clamp(1.4rem, 4vw, 2rem);
-    margin-bottom: 30px;
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    margin-bottom: 18px;
     color: var(--text-color);
 }
 
 .modal-controls {
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    flex-direction: row;
+    gap: 12px;
+}
+
+.modal-controls .btn {
+    flex: 1;
 }
 
 header {

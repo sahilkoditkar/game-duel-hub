@@ -35,6 +35,7 @@ const gameArea = document.getElementById('game-area');
 let currentGameType = null;
 let currentRoomId = null;
 let isGameInitialized = false;
+let modalTimeout = null;
 
 // Event Listeners
 createBtn.addEventListener('click', () => {
@@ -57,6 +58,7 @@ modalLeave.addEventListener('click', () => {
 });
 
 modalPlayAgain.addEventListener('click', () => {
+    if (modalTimeout) { clearTimeout(modalTimeout); modalTimeout = null; }
     socket.emit('play_again', { roomId: currentRoomId });
     modal.classList.add('hidden');
     showStatus('Waiting for restart...');
@@ -91,6 +93,7 @@ socket.on('score_update', (scores) => {
 socket.on('game_start', (data) => {
     console.log('Game starting! Player Index:', data.playerIndex);
     showStatus('Game Starting...');
+    if (modalTimeout) { clearTimeout(modalTimeout); modalTimeout = null; }
     modal.classList.add('hidden'); // Ensure modal is closed
 
     const initFn = GAME_INIT[data.gameType];
@@ -124,10 +127,14 @@ function showStatus(msg) {
     statusEl.textContent = msg;
     statusEl.className = 'status-msg';
 
-    // Check if game over message to trigger modal
+    // Game over — delay modal so players can see the final board state
     if (msg.includes('Won') || msg.includes('Lost') || msg.includes('Draw')) {
         modalMessage.textContent = msg;
-        modal.classList.remove('hidden');
+        if (modalTimeout) clearTimeout(modalTimeout);
+        modalTimeout = setTimeout(() => {
+            modal.classList.remove('hidden');
+            modalTimeout = null;
+        }, 2000);
     }
 }
 
