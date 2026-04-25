@@ -12,8 +12,8 @@ class DotsAndBoxes extends BaseGame {
 
         this.boardSize = 3; // 3x3 boxes (4x4 dots)
         this.horizontalLines = new Array(4).fill(0).map(() => new Array(3).fill(null)); // [row][col]
-        this.verticalLines = new Array(3).fill(0).map(() => new Array(4).fill(null));   // [row][col]
-        this.boxes = new Array(3).fill(0).map(() => new Array(3).fill(null));         // [row][col] -> owner playerIndex
+        this.verticalLines = new Array(3).fill(0).map(() => new Array(4).fill(null)); // [row][col]
+        this.boxes = new Array(3).fill(0).map(() => new Array(3).fill(null)); // [row][col] -> owner playerIndex
 
         this.scores = [0, 0];
         this.activePlayerIndex = 0;
@@ -24,18 +24,23 @@ class DotsAndBoxes extends BaseGame {
     makeMove(playerIndex, move) {
         // move: { type: 'h' or 'v', row: number, col: number }
         if (this.isGameOver) return { valid: false, message: 'Game is over' };
-        if (playerIndex !== this.activePlayerIndex) return { valid: false, message: 'Not your turn' };
+        if (playerIndex !== this.activePlayerIndex)
+            return { valid: false, message: 'Not your turn' };
 
         const { type, row, col } = move;
 
         // Validate coordinates
         if (type === 'h') {
-            if (row < 0 || row > 3 || col < 0 || col > 2) return { valid: false, message: 'Invalid coordinates' };
-            if (this.horizontalLines[row][col] !== null) return { valid: false, message: 'Line already taken' };
+            if (row < 0 || row > 3 || col < 0 || col > 2)
+                return { valid: false, message: 'Invalid coordinates' };
+            if (this.horizontalLines[row][col] !== null)
+                return { valid: false, message: 'Line already taken' };
             this.horizontalLines[row][col] = playerIndex;
         } else if (type === 'v') {
-            if (row < 0 || row > 2 || col < 0 || col > 3) return { valid: false, message: 'Invalid coordinates' };
-            if (this.verticalLines[row][col] !== null) return { valid: false, message: 'Line already taken' };
+            if (row < 0 || row > 2 || col < 0 || col > 3)
+                return { valid: false, message: 'Invalid coordinates' };
+            if (this.verticalLines[row][col] !== null)
+                return { valid: false, message: 'Line already taken' };
             this.verticalLines[row][col] = playerIndex;
         } else {
             return { valid: false, message: 'Invalid move type' };
@@ -97,7 +102,7 @@ class DotsAndBoxes extends BaseGame {
             scores: this.scores,
             activePlayerIndex: this.activePlayerIndex,
             isGameOver: this.isGameOver,
-            winner: this.winner
+            winner: this.winner,
         };
     }
 }

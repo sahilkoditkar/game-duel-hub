@@ -166,13 +166,16 @@ function initWordChain(socket, container, roomId, playerIndex, initialState) {
     socket.on('game_state', (data) => render(data));
     socket.on('invalid_move', (msg) => {
         messageEl.textContent = msg;
-        setTimeout(() => { messageEl.textContent = ''; }, 3000);
+        setTimeout(() => {
+            messageEl.textContent = '';
+        }, 3000);
     });
 
     if (initialState) render(initialState);
 
     function render(state) {
-        const { words, lastLetter, timeLeft, message, activePlayerIndex, isGameOver, winner } = state;
+        const { words, lastLetter, timeLeft, message, activePlayerIndex, isGameOver, winner } =
+            state;
 
         // Timer
         timerEl.textContent = timeLeft;
@@ -188,13 +191,15 @@ function initWordChain(socket, container, roomId, playerIndex, initialState) {
 
         // Words list
         wordsEl.innerHTML = '';
-        let myCount = 0, oppCount = 0;
-        words.forEach((entry, i) => {
+        let myCount = 0,
+            oppCount = 0;
+        words.forEach((entry) => {
             const div = document.createElement('div');
             div.className = `wc-word p${entry.player}`;
             const w = entry.word;
             // Highlight last letter
-            div.innerHTML = w.slice(0, -1) + `<span class="wc-chain-letter">${w[w.length - 1]}</span>`;
+            div.innerHTML =
+                w.slice(0, -1) + `<span class="wc-chain-letter">${w[w.length - 1]}</span>`;
             wordsEl.appendChild(div);
             if (entry.player === myIdx) myCount++;
             else oppCount++;
@@ -223,13 +228,13 @@ function initWordChain(socket, container, roomId, playerIndex, initialState) {
                 statusEl.textContent = "It's a Draw!";
                 showStatus("It's a Draw!");
             } else {
-                const msg = winner === myIdx ? "You Won!" : "You Lost!";
+                const msg = winner === myIdx ? 'You Won!' : 'You Lost!';
                 statusEl.textContent = msg;
                 showStatus(msg);
             }
         } else {
-            statusEl.textContent = isMyTurn ? "Your Turn - Type fast!" : "Opponent's Turn";
-            statusEl.style.color = isMyTurn ? "#4caf50" : "#fff";
+            statusEl.textContent = isMyTurn ? 'Your Turn - Type fast!' : "Opponent's Turn";
+            statusEl.style.color = isMyTurn ? '#4caf50' : '#fff';
         }
     }
 }

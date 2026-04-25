@@ -39,7 +39,7 @@ function initHangman(socket, gameArea, roomId, playerIndex, initialState) {
 
     // Generate Keyboard
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    alphabet.split('').forEach(letter => {
+    alphabet.split('').forEach((letter) => {
         const btn = document.createElement('button');
         btn.textContent = letter;
         btn.className = 'key-btn';
@@ -66,16 +66,16 @@ function initHangman(socket, gameArea, roomId, playerIndex, initialState) {
 
         // Update Turn Indicator
         if (state.activePlayerIndex === playerIndex) {
-            turnIndicator.textContent = "Your Turn";
-            turnIndicator.style.color = "#4ade80";
+            turnIndicator.textContent = 'Your Turn';
+            turnIndicator.style.color = '#4ade80';
         } else {
             turnIndicator.textContent = "Opponent's Turn";
-            turnIndicator.style.color = "#f87171";
+            turnIndicator.style.color = '#f87171';
         }
 
         // Update Word Display
         wordDisplay.innerHTML = '';
-        state.maskedWord.split('').forEach(char => {
+        state.maskedWord.split('').forEach((char) => {
             const span = document.createElement('span');
             span.textContent = char;
             span.className = 'letter-box';
@@ -84,7 +84,7 @@ function initHangman(socket, gameArea, roomId, playerIndex, initialState) {
 
         // Update Keyboard (disable guessed letters)
         const keys = document.querySelectorAll('.key-btn');
-        keys.forEach(key => {
+        keys.forEach((key) => {
             if (state.guessedLetters.includes(key.textContent)) {
                 key.disabled = true;
                 key.classList.add('used');
@@ -114,7 +114,7 @@ function initHangman(socket, gameArea, roomId, playerIndex, initialState) {
                 showStatus(msg);
             }
 
-            keys.forEach(k => k.disabled = true);
+            keys.forEach((k) => (k.disabled = true));
         } else {
             if (revealArea) revealArea.textContent = '';
         }
@@ -137,7 +137,7 @@ function initHangman(socket, gameArea, roomId, playerIndex, initialState) {
 }
 
 // Add some styles dynamically for Hangman specific elements
-(function() {
+(function () {
     const oldStyle = document.getElementById('hangman-styles');
     if (oldStyle) oldStyle.remove();
 

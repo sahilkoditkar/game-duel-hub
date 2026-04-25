@@ -172,12 +172,13 @@ function initBattleship(socket, container, roomId, playerIndex, initialState) {
 
         // Status
         if (isGameOver) {
-            const msg = winner === myIdx ? "You Won!" : "You Lost!";
+            const msg = winner === myIdx ? 'You Won!' : 'You Lost!';
             statusEl.textContent = msg;
             showStatus(msg);
         } else {
-            statusEl.textContent = activePlayerIndex === myIdx ? "Your Turn - Fire!" : "Opponent's Turn";
-            statusEl.style.color = activePlayerIndex === myIdx ? "#4caf50" : "#fff";
+            statusEl.textContent =
+                activePlayerIndex === myIdx ? 'Your Turn - Fire!' : "Opponent's Turn";
+            statusEl.style.color = activePlayerIndex === myIdx ? '#4caf50' : '#fff';
         }
     }
 

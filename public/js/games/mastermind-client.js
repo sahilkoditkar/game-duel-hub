@@ -1,7 +1,6 @@
 function initMastermind(socket, gameArea, roomId, playerIndex, initialState) {
     console.log('Initializing Mastermind for player', playerIndex);
 
-    let gameState = initialState || {};
     let currentInput = [];
 
     const oldStyle = document.getElementById('mastermind-styles');
@@ -211,7 +210,7 @@ function initMastermind(socket, gameArea, roomId, playerIndex, initialState) {
 
         socket.emit('make_move', {
             roomId,
-            move: { code: currentInput }
+            move: { code: currentInput },
         });
 
         currentInput = [];
@@ -238,17 +237,19 @@ function initMastermind(socket, gameArea, roomId, playerIndex, initialState) {
     }
 
     function renderState(state) {
-        gameState = state;
         const isMaker = state.makerIndex === playerIndex;
         const isBreaker = !isMaker;
         const myTurn = state.activePlayerIndex === playerIndex;
 
-        roleDisplay.textContent = isMaker ? "Role: MAKER (Set Code)" : "Role: BREAKER (Guess Code)";
+        roleDisplay.textContent = isMaker ? 'Role: MAKER (Set Code)' : 'Role: BREAKER (Guess Code)';
 
-        if ((isMaker && state.secretCode && state.secretCode.length > 0) || (state.isGameOver && state.secretCode)) {
+        if (
+            (isMaker && state.secretCode && state.secretCode.length > 0) ||
+            (state.isGameOver && state.secretCode)
+        ) {
             secretDisplay.style.display = 'block';
             secretSlots.innerHTML = '';
-            state.secretCode.forEach(d => {
+            state.secretCode.forEach((d) => {
                 const s = document.createElement('div');
                 s.className = 'mm-slot';
                 s.textContent = d;
@@ -260,11 +261,11 @@ function initMastermind(socket, gameArea, roomId, playerIndex, initialState) {
 
         if (state.phase === 'SETUP') {
             if (isMaker) {
-                statusEl.textContent = "Please set the secret code (4 digits)";
+                statusEl.textContent = 'Please set the secret code (4 digits)';
                 controlsDiv.style.display = 'flex';
-                submitBtn.textContent = "Set Secret Code";
+                submitBtn.textContent = 'Set Secret Code';
             } else {
-                statusEl.textContent = "Opponent is setting the secret code...";
+                statusEl.textContent = 'Opponent is setting the secret code...';
                 controlsDiv.style.display = 'none';
             }
             attemptsBox.style.display = 'none';
@@ -281,9 +282,11 @@ function initMastermind(socket, gameArea, roomId, playerIndex, initialState) {
             else if (remaining <= 2) attemptsBox.classList.add('warning');
 
             if (isBreaker) {
-                statusEl.textContent = myTurn ? `Your turn - ${remaining} guess${remaining === 1 ? '' : 'es'} left!` : "Waiting...";
+                statusEl.textContent = myTurn
+                    ? `Your turn - ${remaining} guess${remaining === 1 ? '' : 'es'} left!`
+                    : 'Waiting...';
                 controlsDiv.style.display = 'flex';
-                submitBtn.textContent = "Submit Guess";
+                submitBtn.textContent = 'Submit Guess';
             } else {
                 statusEl.textContent = `Opponent guessing (${remaining} left)`;
                 controlsDiv.style.display = 'none';
@@ -293,8 +296,8 @@ function initMastermind(socket, gameArea, roomId, playerIndex, initialState) {
         if (state.isGameOver) {
             controlsDiv.style.display = 'none';
             let msg = '';
-            if (state.winner === playerIndex) msg = "You Won!";
-            else msg = "You Lost!";
+            if (state.winner === playerIndex) msg = 'You Won!';
+            else msg = 'You Lost!';
 
             if (typeof showStatus === 'function') showStatus(msg);
             statusEl.textContent = msg;
@@ -303,7 +306,7 @@ function initMastermind(socket, gameArea, roomId, playerIndex, initialState) {
         // Render Board (History)
         boardEl.innerHTML = '';
 
-        state.guesses.forEach((guess, idx) => {
+        state.guesses.forEach((guess) => {
             const row = document.createElement('div');
             row.className = 'mm-row';
 

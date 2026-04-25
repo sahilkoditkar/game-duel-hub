@@ -6,10 +6,7 @@ class Battleship extends BaseGame {
         this.size = 10;
 
         // 0: Water, 1: Ship, 2: Miss, 3: Hit
-        this.grids = [
-            this.createGrid(),
-            this.createGrid()
-        ];
+        this.grids = [this.createGrid(), this.createGrid()];
 
         // Ships config: Size
         this.shipsToPlace = [5, 4, 3, 3, 2];
@@ -29,13 +26,15 @@ class Battleship extends BaseGame {
     makeMove(playerIndex, move) {
         // move: { row, col }
         if (this.isGameOver) return { valid: false, message: 'Game is over' };
-        if (playerIndex !== this.activePlayerIndex) return { valid: false, message: 'Not your turn' };
+        if (playerIndex !== this.activePlayerIndex)
+            return { valid: false, message: 'Not your turn' };
 
         const { row, col } = move;
         const opponentIndex = 1 - playerIndex;
         const oppGrid = this.grids[opponentIndex];
 
-        if (row < 0 || row >= 10 || col < 0 || col >= 10) return { valid: false, message: 'Invalid coordinates' };
+        if (row < 0 || row >= 10 || col < 0 || col >= 10)
+            return { valid: false, message: 'Invalid coordinates' };
 
         const cell = oppGrid[row][col];
         if (cell === 2 || cell === 3) return { valid: false, message: 'Already fired here' };
@@ -63,7 +62,9 @@ class Battleship extends BaseGame {
     }
 
     createGrid() {
-        return Array(10).fill(null).map(() => Array(10).fill(0));
+        return Array(10)
+            .fill(null)
+            .map(() => Array(10).fill(0));
     }
 
     placeRandomShips(playerIndex) {
@@ -125,14 +126,12 @@ class Battleship extends BaseGame {
         }
     }
 
-
-
     checkWin() {
         // Check if all ships (1s) are gone (turned to 3s)
         // Actually we just check if any '1' remains in grid
 
-        const p0HasShips = this.grids[0].some(row => row.includes(1));
-        const p1HasShips = this.grids[1].some(row => row.includes(1));
+        const p0HasShips = this.grids[0].some((row) => row.includes(1));
+        const p1HasShips = this.grids[1].some((row) => row.includes(1));
 
         if (!p0HasShips) {
             this.isGameOver = true;
@@ -142,7 +141,7 @@ class Battleship extends BaseGame {
             this.winner = 0; // P1 lost
         }
 
-        // Optional: Can update 'scores' to be sunken ships count for display, 
+        // Optional: Can update 'scores' to be sunken ships count for display,
         // but finding sunk ships is slightly more complex logic here.
         // For now, let's just stick to win/loss.
     }
@@ -152,7 +151,7 @@ class Battleship extends BaseGame {
             grids: this.grids,
             activePlayerIndex: this.activePlayerIndex,
             isGameOver: this.isGameOver,
-            winner: this.winner
+            winner: this.winner,
         };
     }
 }

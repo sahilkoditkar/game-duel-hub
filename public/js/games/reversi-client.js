@@ -145,7 +145,8 @@ function initReversi(socket, container, roomId, playerIndex, initialState) {
 
         const validSet = new Set(validMoves.map(([r, c]) => `${r},${c}`));
 
-        let count0 = 0, count1 = 0;
+        let count0 = 0,
+            count1 = 0;
 
         for (let r = 0; r < 8; r++) {
             for (let c = 0; c < 8; c++) {
@@ -177,14 +178,15 @@ function initReversi(socket, container, roomId, playerIndex, initialState) {
                 statusEl.textContent = "It's a Draw!";
                 showStatus("It's a Draw!");
             } else {
-                const msg = winner === myIdx ? "You Won!" : "You Lost!";
+                const msg = winner === myIdx ? 'You Won!' : 'You Lost!';
                 statusEl.textContent = msg;
                 showStatus(msg);
             }
         } else {
             const roleLabel = myIdx === 0 ? 'Black' : 'White';
-            statusEl.textContent = activePlayerIndex === myIdx ? `Your Turn (${roleLabel})` : "Opponent's Turn";
-            statusEl.style.color = activePlayerIndex === myIdx ? "#4caf50" : "#fff";
+            statusEl.textContent =
+                activePlayerIndex === myIdx ? `Your Turn (${roleLabel})` : "Opponent's Turn";
+            statusEl.style.color = activePlayerIndex === myIdx ? '#4caf50' : '#fff';
         }
     }
 }

@@ -13,7 +13,7 @@ const GAME_REGISTRY = {
     memory: { module: './games/memory' },
     wordchain: { module: './games/wordchain', special: 'wordchain' },
     reversi: { module: './games/reversi' },
-    checkers: { module: './games/checkers' }
+    checkers: { module: './games/checkers' },
 };
 
 class GameManager {
@@ -29,7 +29,7 @@ class GameManager {
             game: null,
             type: gameType,
             status: 'waiting',
-            scores: [0, 0] // [p1, p2]
+            scores: [0, 0], // [p1, p2]
         });
         socket.join(roomId);
         socket.emit('room_created', { roomId, gameType });
@@ -87,7 +87,12 @@ class GameManager {
             room.game = new GameClass(roomId, room.players, startingPlayerIndex, room.usedWords);
             if (room.game.word) room.usedWords.push(room.game.word);
         } else if (entry.special === 'mastermind') {
-            room.game = new GameClass(roomId, room.players, startingPlayerIndex, room.lastMakerIndex);
+            room.game = new GameClass(
+                roomId,
+                room.players,
+                startingPlayerIndex,
+                room.lastMakerIndex
+            );
             room.lastMakerIndex = room.game.makerIndex;
         } else if (entry.special === 'wordchain') {
             room.game = new GameClass(roomId, room.players, startingPlayerIndex, this.io);
@@ -104,7 +109,7 @@ class GameManager {
                 roomId,
                 playerIndex: index,
                 gameType: room.type,
-                initialState
+                initialState,
             });
         });
 

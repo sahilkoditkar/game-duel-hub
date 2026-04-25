@@ -24,7 +24,7 @@ class Checkers extends BaseGame {
 
         this.gameState = {
             board,
-            mustContinue: null // { row, col } if mid-multi-jump
+            mustContinue: null, // { row, col } if mid-multi-jump
         };
     }
 
@@ -32,24 +32,24 @@ class Checkers extends BaseGame {
         const { fromRow, fromCol, toRow, toCol } = moveData;
 
         if (!this.isTurn(playerIndex)) {
-            return { valid: false, message: "Not your turn" };
+            return { valid: false, message: 'Not your turn' };
         }
         if (this.isGameOver) {
-            return { valid: false, message: "Game is over" };
+            return { valid: false, message: 'Game is over' };
         }
 
         const board = this.gameState.board;
         const piece = board[fromRow] && board[fromRow][fromCol];
 
         if (!piece || piece.player !== playerIndex) {
-            return { valid: false, message: "Not your piece" };
+            return { valid: false, message: 'Not your piece' };
         }
 
         // If must continue multi-jump, can only move that piece
         if (this.gameState.mustContinue) {
             const mc = this.gameState.mustContinue;
             if (fromRow !== mc.row || fromCol !== mc.col) {
-                return { valid: false, message: "Must continue jumping with the same piece" };
+                return { valid: false, message: 'Must continue jumping with the same piece' };
             }
         }
 
@@ -60,10 +60,10 @@ class Checkers extends BaseGame {
         const absDc = Math.abs(dc);
 
         if (toRow < 0 || toRow >= 8 || toCol < 0 || toCol >= 8) {
-            return { valid: false, message: "Out of bounds" };
+            return { valid: false, message: 'Out of bounds' };
         }
         if (board[toRow][toCol] !== null) {
-            return { valid: false, message: "Square occupied" };
+            return { valid: false, message: 'Square occupied' };
         }
 
         // Direction check (non-kings can only move forward)
@@ -77,13 +77,13 @@ class Checkers extends BaseGame {
         if (absDr === 1 && absDc === 1) {
             // Simple move
             if (hasCaptures) {
-                return { valid: false, message: "You must capture when possible" };
+                return { valid: false, message: 'You must capture when possible' };
             }
             if (this.gameState.mustContinue) {
-                return { valid: false, message: "Must continue jumping" };
+                return { valid: false, message: 'Must continue jumping' };
             }
             if (!piece.king && !isForward) {
-                return { valid: false, message: "Regular pieces can only move forward" };
+                return { valid: false, message: 'Regular pieces can only move forward' };
             }
 
             board[toRow][toCol] = piece;
@@ -93,11 +93,10 @@ class Checkers extends BaseGame {
             // King promotion
             this.checkPromotion(toRow, toCol);
             this.switchTurn();
-
         } else if (absDr === 2 && absDc === 2) {
             // Jump/capture
             if (!piece.king && !isForward) {
-                return { valid: false, message: "Regular pieces can only jump forward" };
+                return { valid: false, message: 'Regular pieces can only jump forward' };
             }
 
             const midR = fromRow + dr / 2;
@@ -105,7 +104,7 @@ class Checkers extends BaseGame {
             const midPiece = board[midR][midC];
 
             if (!midPiece || midPiece.player === playerIndex) {
-                return { valid: false, message: "No opponent piece to capture" };
+                return { valid: false, message: 'No opponent piece to capture' };
             }
 
             // Execute capture
@@ -125,7 +124,7 @@ class Checkers extends BaseGame {
                 this.switchTurn();
             }
         } else {
-            return { valid: false, message: "Invalid move" };
+            return { valid: false, message: 'Invalid move' };
         }
 
         // Check win conditions
@@ -148,10 +147,21 @@ class Checkers extends BaseGame {
 
         const captures = [];
         const dirs = piece.king
-            ? [[-2,-2],[-2,2],[2,-2],[2,2]]
+            ? [
+                  [-2, -2],
+                  [-2, 2],
+                  [2, -2],
+                  [2, 2],
+              ]
             : player === 0
-                ? [[2,-2],[2,2]]
-                : [[-2,-2],[-2,2]];
+              ? [
+                    [2, -2],
+                    [2, 2],
+                ]
+              : [
+                    [-2, -2],
+                    [-2, 2],
+                ];
 
         for (const [dr, dc] of dirs) {
             const tr = row + dr;
@@ -159,9 +169,15 @@ class Checkers extends BaseGame {
             const mr = row + dr / 2;
             const mc = col + dc / 2;
 
-            if (tr >= 0 && tr < 8 && tc >= 0 && tc < 8 &&
+            if (
+                tr >= 0 &&
+                tr < 8 &&
+                tc >= 0 &&
+                tc < 8 &&
                 board[tr][tc] === null &&
-                board[mr][mc] && board[mr][mc].player !== player) {
+                board[mr][mc] &&
+                board[mr][mc].player !== player
+            ) {
                 captures.push({ fromRow: row, fromCol: col, toRow: tr, toCol: tc });
             }
         }
@@ -196,8 +212,16 @@ class Checkers extends BaseGame {
                 if (!piece || piece.player !== player) continue;
 
                 const dirs = piece.king
-                    ? [[-1,-1],[-1,1],[1,-1],[1,1]]
-                    : [[forwardDir, -1], [forwardDir, 1]];
+                    ? [
+                          [-1, -1],
+                          [-1, 1],
+                          [1, -1],
+                          [1, 1],
+                      ]
+                    : [
+                          [forwardDir, -1],
+                          [forwardDir, 1],
+                      ];
 
                 for (const [dr, dc] of dirs) {
                     const tr = r + dr;
@@ -225,15 +249,19 @@ class Checkers extends BaseGame {
 
     getState() {
         // Serialize board
-        const board = this.gameState.board.map(row =>
-            row.map(cell => cell ? { player: cell.player, king: cell.king } : null)
+        const board = this.gameState.board.map((row) =>
+            row.map((cell) => (cell ? { player: cell.player, king: cell.king } : null))
         );
 
-        const validMoves = this.isGameOver ? [] : (
-            this.gameState.mustContinue
-                ? this.getPieceCaptures(this.gameState.mustContinue.row, this.gameState.mustContinue.col, this.activePlayerIndex)
-                : this.getValidMoves(this.activePlayerIndex)
-        );
+        const validMoves = this.isGameOver
+            ? []
+            : this.gameState.mustContinue
+              ? this.getPieceCaptures(
+                    this.gameState.mustContinue.row,
+                    this.gameState.mustContinue.col,
+                    this.activePlayerIndex
+                )
+              : this.getValidMoves(this.activePlayerIndex);
 
         return {
             board,
@@ -241,7 +269,7 @@ class Checkers extends BaseGame {
             mustContinue: this.gameState.mustContinue,
             activePlayerIndex: this.activePlayerIndex,
             isGameOver: this.isGameOver,
-            winner: this.winner
+            winner: this.winner,
         };
     }
 }

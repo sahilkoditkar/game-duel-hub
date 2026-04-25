@@ -4,7 +4,16 @@ class Memory extends BaseGame {
     constructor(id, players, startingPlayerIndex) {
         super(id, players, startingPlayerIndex);
 
-        const symbols = ['\u2660', '\u2665', '\u2666', '\u2663', '\u2605', '\u263A', '\u266B', '\u2744']; // 8 pairs
+        const symbols = [
+            '\u2660',
+            '\u2665',
+            '\u2666',
+            '\u2663',
+            '\u2605',
+            '\u263A',
+            '\u266B',
+            '\u2744',
+        ]; // 8 pairs
         const pairs = [...symbols, ...symbols];
 
         // Shuffle
@@ -14,11 +23,11 @@ class Memory extends BaseGame {
         }
 
         this.gameState = {
-            cards: pairs,           // 16 cards (4x4)
-            revealed: Array(16).fill(false),  // permanently revealed (matched)
-            flipped: [],            // currently flipped indices (0-2)
-            scores: [0, 0],         // pairs found per player
-            totalPairs: 8
+            cards: pairs, // 16 cards (4x4)
+            revealed: Array(16).fill(false), // permanently revealed (matched)
+            flipped: [], // currently flipped indices (0-2)
+            scores: [0, 0], // pairs found per player
+            totalPairs: 8,
         };
 
         this.flipTimeout = null;
@@ -28,22 +37,22 @@ class Memory extends BaseGame {
         const { index } = moveData;
 
         if (!this.isTurn(playerIndex)) {
-            return { valid: false, message: "Not your turn" };
+            return { valid: false, message: 'Not your turn' };
         }
         if (this.isGameOver) {
-            return { valid: false, message: "Game is over" };
+            return { valid: false, message: 'Game is over' };
         }
         if (index < 0 || index >= 16) {
-            return { valid: false, message: "Invalid card" };
+            return { valid: false, message: 'Invalid card' };
         }
         if (this.gameState.revealed[index]) {
-            return { valid: false, message: "Card already matched" };
+            return { valid: false, message: 'Card already matched' };
         }
         if (this.gameState.flipped.includes(index)) {
-            return { valid: false, message: "Card already flipped" };
+            return { valid: false, message: 'Card already flipped' };
         }
         if (this.gameState.flipped.length >= 2) {
-            return { valid: false, message: "Wait for cards to flip back" };
+            return { valid: false, message: 'Wait for cards to flip back' };
         }
 
         this.gameState.flipped.push(index);
@@ -59,7 +68,10 @@ class Memory extends BaseGame {
                 this.gameState.flipped = [];
 
                 // Check game over
-                if (this.gameState.scores[0] + this.gameState.scores[1] === this.gameState.totalPairs) {
+                if (
+                    this.gameState.scores[0] + this.gameState.scores[1] ===
+                    this.gameState.totalPairs
+                ) {
                     this.isGameOver = true;
                     if (this.gameState.scores[0] > this.gameState.scores[1]) {
                         this.winner = 0;
@@ -105,7 +117,7 @@ class Memory extends BaseGame {
             scores: this.gameState.scores,
             activePlayerIndex: this.activePlayerIndex,
             isGameOver: this.isGameOver,
-            winner: this.winner
+            winner: this.winner,
         };
     }
 

@@ -28,7 +28,8 @@ class Mastermind extends BaseGame {
     makeMove(playerIndex, move) {
         // move: { code: [0, 1, 2, 3] }
         if (this.isGameOver) return { valid: false, message: 'Game is over' };
-        if (playerIndex !== this.activePlayerIndex) return { valid: false, message: 'Not your turn' };
+        if (playerIndex !== this.activePlayerIndex)
+            return { valid: false, message: 'Not your turn' };
 
         const { code } = move;
         if (!Array.isArray(code) || code.length !== 4) {
@@ -36,21 +37,22 @@ class Mastermind extends BaseGame {
         }
 
         // Validate digits (0-9)
-        if (!code.every(d => Number.isInteger(d) && d >= 0 && d <= 9)) {
+        if (!code.every((d) => Number.isInteger(d) && d >= 0 && d <= 9)) {
             return { valid: false, message: 'Invalid digits (0-9 only)' };
         }
 
         if (this.phase === 'SETUP') {
             // Maker setting the code
-            if (playerIndex !== this.makerIndex) return { valid: false, message: 'Only Maker can set code' };
+            if (playerIndex !== this.makerIndex)
+                return { valid: false, message: 'Only Maker can set code' };
 
             this.secretCode = code;
             this.phase = 'PLAYING';
             this.activePlayerIndex = this.breakerIndex; // Switch to Breaker
-
         } else if (this.phase === 'PLAYING') {
             // Breaker guessing
-            if (playerIndex !== this.breakerIndex) return { valid: false, message: 'Only Breaker can guess' };
+            if (playerIndex !== this.breakerIndex)
+                return { valid: false, message: 'Only Breaker can guess' };
 
             const feedback = this.calculateFeedback(this.secretCode, code);
             // Feedback is now an array: [2, 0, 1, 0]
@@ -58,11 +60,11 @@ class Mastermind extends BaseGame {
 
             this.guesses.push({
                 code,
-                feedback
+                feedback,
             });
 
             // Check Win: All 2s
-            if (feedback.every(f => f === 2)) {
+            if (feedback.every((f) => f === 2)) {
                 this.isGameOver = true;
                 this.winner = this.breakerIndex; // Breaker wins
                 this.scores[this.winner] = 1;
@@ -123,7 +125,7 @@ class Mastermind extends BaseGame {
             maxAttempts: this.maxAttempts,
             secretCode: this.secretCode, // Send always. Client uses it if Maker.
             // Add a flag to confirm setup is done
-            isSetupDone: this.phase === 'PLAYING'
+            isSetupDone: this.phase === 'PLAYING',
         };
     }
 }

@@ -171,15 +171,18 @@ function initCheckers(socket, container, roomId, playerIndex, initialState) {
                     fromRow: selectedPiece.row,
                     fromCol: selectedPiece.col,
                     toRow: row,
-                    toCol: col
-                }
+                    toCol: col,
+                },
             });
         } else {
             // Select a piece
             if (piece && piece.player === myIdx) {
                 // If must continue, only allow selecting that piece
                 if (currentState.mustContinue) {
-                    if (row === currentState.mustContinue.row && col === currentState.mustContinue.col) {
+                    if (
+                        row === currentState.mustContinue.row &&
+                        col === currentState.mustContinue.col
+                    ) {
                         selectedPiece = { row, col };
                         render(currentState);
                     }
@@ -198,15 +201,20 @@ function initCheckers(socket, container, roomId, playerIndex, initialState) {
         const validTargets = new Set();
         const validSources = new Set();
         if (!isGameOver && activePlayerIndex === myIdx) {
-            validMoves.forEach(m => {
+            validMoves.forEach((m) => {
                 validSources.add(`${m.fromRow},${m.fromCol}`);
-                if (selectedPiece && m.fromRow === selectedPiece.row && m.fromCol === selectedPiece.col) {
+                if (
+                    selectedPiece &&
+                    m.fromRow === selectedPiece.row &&
+                    m.fromCol === selectedPiece.col
+                ) {
                     validTargets.add(`${m.toRow},${m.toCol}`);
                 }
             });
         }
 
-        let count0 = 0, count1 = 0;
+        let count0 = 0,
+            count1 = 0;
 
         for (let r = 0; r < 8; r++) {
             for (let c = 0; c < 8; c++) {
@@ -246,16 +254,19 @@ function initCheckers(socket, container, roomId, playerIndex, initialState) {
                 statusEl.textContent = "It's a Draw!";
                 showStatus("It's a Draw!");
             } else {
-                const msg = winner === myIdx ? "You Won!" : "You Lost!";
+                const msg = winner === myIdx ? 'You Won!' : 'You Lost!';
                 statusEl.textContent = msg;
                 showStatus(msg);
             }
         } else {
             const roleLabel = myIdx === 0 ? 'Black' : 'White';
-            statusEl.textContent = activePlayerIndex === myIdx
-                ? (mustContinue ? "Continue jumping!" : `Your Turn (${roleLabel})`)
-                : "Opponent's Turn";
-            statusEl.style.color = activePlayerIndex === myIdx ? "#4caf50" : "#fff";
+            statusEl.textContent =
+                activePlayerIndex === myIdx
+                    ? mustContinue
+                        ? 'Continue jumping!'
+                        : `Your Turn (${roleLabel})`
+                    : "Opponent's Turn";
+            statusEl.style.color = activePlayerIndex === myIdx ? '#4caf50' : '#fff';
         }
     }
 }

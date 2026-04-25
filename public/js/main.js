@@ -13,7 +13,7 @@ const GAME_INIT = {
     memory: 'initMemory',
     wordchain: 'initWordChain',
     reversi: 'initReversi',
-    checkers: 'initCheckers'
+    checkers: 'initCheckers',
 };
 
 // UI Elements
@@ -32,9 +32,7 @@ const modalLeave = document.getElementById('modal-leave');
 
 const gameArea = document.getElementById('game-area');
 
-let currentGameType = null;
 let currentRoomId = null;
-let isGameInitialized = false;
 let modalTimeout = null;
 
 // Event Listeners
@@ -58,7 +56,10 @@ modalLeave.addEventListener('click', () => {
 });
 
 modalPlayAgain.addEventListener('click', () => {
-    if (modalTimeout) { clearTimeout(modalTimeout); modalTimeout = null; }
+    if (modalTimeout) {
+        clearTimeout(modalTimeout);
+        modalTimeout = null;
+    }
     socket.emit('play_again', { roomId: currentRoomId });
     modal.classList.add('hidden');
     showStatus('Waiting for restart...');
@@ -81,7 +82,7 @@ socket.on('room_joined', (data) => {
     showStatus('Joined room! Waiting for game start...');
 });
 
-socket.on('player_joined', (data) => {
+socket.on('player_joined', () => {
     showStatus('Player joined!');
 });
 
@@ -93,7 +94,10 @@ socket.on('score_update', (scores) => {
 socket.on('game_start', (data) => {
     console.log('Game starting! Player Index:', data.playerIndex);
     showStatus('Game Starting...');
-    if (modalTimeout) { clearTimeout(modalTimeout); modalTimeout = null; }
+    if (modalTimeout) {
+        clearTimeout(modalTimeout);
+        modalTimeout = null;
+    }
     modal.classList.add('hidden'); // Ensure modal is closed
 
     const initFn = GAME_INIT[data.gameType];

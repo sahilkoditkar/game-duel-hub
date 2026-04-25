@@ -49,7 +49,7 @@ function initTicTacToe(socket, container, roomId, playerIndex, initialState) {
 
     const boardEl = document.getElementById('board');
     const statusEl = document.getElementById('game-status');
-    let myPlayerIndex = playerIndex;
+    const myPlayerIndex = playerIndex;
     console.log('Initialized as player ' + myPlayerIndex);
 
     // Create cells
@@ -96,12 +96,13 @@ function initTicTacToe(socket, container, roomId, playerIndex, initialState) {
                 statusEl.textContent = "It's a Draw!";
                 showStatus("It's a Draw!");
             } else {
-                const msg = winner === myPlayerIndex ? "You Won!" : "You Lost!";
+                const msg = winner === myPlayerIndex ? 'You Won!' : 'You Lost!';
                 statusEl.textContent = msg;
                 showStatus(msg);
             }
         } else {
-            statusEl.textContent = activePlayerIndex === myPlayerIndex ? "Your Turn" : "Opponent's Turn";
+            statusEl.textContent =
+                activePlayerIndex === myPlayerIndex ? 'Your Turn' : "Opponent's Turn";
         }
     }
 }

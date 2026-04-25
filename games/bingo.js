@@ -7,10 +7,7 @@ class Bingo extends BaseGame {
         this.maxNumber = 25; // 1-25
 
         // Generate random board for each player
-        this.boards = [
-            this.generateBoard(),
-            this.generateBoard()
-        ];
+        this.boards = [this.generateBoard(), this.generateBoard()];
 
         this.selectedNumbers = new Set();
         // this.activePlayerIndex is set by BaseGame
@@ -41,11 +38,14 @@ class Bingo extends BaseGame {
     makeMove(playerIndex, move) {
         // move: { number: integer }
         if (this.isGameOver) return { valid: false, message: 'Game is over' };
-        if (playerIndex !== this.activePlayerIndex) return { valid: false, message: 'Not your turn' };
+        if (playerIndex !== this.activePlayerIndex)
+            return { valid: false, message: 'Not your turn' };
 
         const { number } = move;
-        if (!number || number < 1 || number > 25) return { valid: false, message: 'Invalid number' };
-        if (this.selectedNumbers.has(number)) return { valid: false, message: 'Number already selected' };
+        if (!number || number < 1 || number > 25)
+            return { valid: false, message: 'Invalid number' };
+        if (this.selectedNumbers.has(number))
+            return { valid: false, message: 'Number already selected' };
 
         this.selectedNumbers.add(number);
 
@@ -68,7 +68,7 @@ class Bingo extends BaseGame {
 
         // Rows
         for (let r = 0; r < 5; r++) {
-            if (board[r].every(n => this.selectedNumbers.has(n))) lines++;
+            if (board[r].every((n) => this.selectedNumbers.has(n))) lines++;
         }
 
         // Cols
@@ -125,7 +125,7 @@ class Bingo extends BaseGame {
             scores: this.scores,
             activePlayerIndex: this.activePlayerIndex,
             isGameOver: this.isGameOver,
-            winner: this.winner
+            winner: this.winner,
         };
     }
 }

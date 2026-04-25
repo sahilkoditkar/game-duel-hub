@@ -5,14 +5,30 @@ class Hangman extends BaseGame {
         super(roomId, players, startingPlayerIndex);
 
         const allWords = [
-            'JAVASCRIPT', 'PROGRAMMING', 'COMPUTER', 'INTERNET', 'DATABASE',
-            'ALGORITHM', 'NETWORK', 'SECURITY', 'FRONTEND', 'BACKEND',
-            'VARIABLE', 'FUNCTION', 'BROWSER', 'KEYBOARD', 'MONITOR',
-            'SOFTWARE', 'HARDWARE', 'APPLICATION', 'COMPONENT', 'INTERFACE'
+            'JAVASCRIPT',
+            'PROGRAMMING',
+            'COMPUTER',
+            'INTERNET',
+            'DATABASE',
+            'ALGORITHM',
+            'NETWORK',
+            'SECURITY',
+            'FRONTEND',
+            'BACKEND',
+            'VARIABLE',
+            'FUNCTION',
+            'BROWSER',
+            'KEYBOARD',
+            'MONITOR',
+            'SOFTWARE',
+            'HARDWARE',
+            'APPLICATION',
+            'COMPONENT',
+            'INTERFACE',
         ];
 
         // Filter out used words
-        let availableWords = allWords.filter(w => !usedWords.includes(w));
+        let availableWords = allWords.filter((w) => !usedWords.includes(w));
 
         // Reset if all words used
         if (availableWords.length === 0) {
@@ -32,7 +48,8 @@ class Hangman extends BaseGame {
     makeMove(playerIndex, move) {
         // move: { letter: "A" }
         if (this.isGameOver) return { valid: false, message: 'Game is over' };
-        if (playerIndex !== this.activePlayerIndex) return { valid: false, message: 'Not your turn' };
+        if (playerIndex !== this.activePlayerIndex)
+            return { valid: false, message: 'Not your turn' };
 
         let { letter } = move;
         if (!letter || typeof letter !== 'string' || letter.length !== 1) {
@@ -50,7 +67,7 @@ class Hangman extends BaseGame {
         let hit = false;
         let count = 0;
 
-        for (let char of this.word) {
+        for (const char of this.word) {
             if (char === letter) {
                 count++;
             }
@@ -84,7 +101,7 @@ class Hangman extends BaseGame {
 
     checkWin() {
         // Check if word is fully solved
-        const isSolved = this.word.split('').every(char => this.guessedLetters.includes(char));
+        const isSolved = this.word.split('').every((char) => this.guessedLetters.includes(char));
 
         if (isSolved) {
             this.isGameOver = true;
@@ -122,9 +139,10 @@ class Hangman extends BaseGame {
 
     getState() {
         // Mask the word for client
-        const maskedWord = this.word.split('').map(char =>
-            this.guessedLetters.includes(char) ? char : '_'
-        ).join('');
+        const maskedWord = this.word
+            .split('')
+            .map((char) => (this.guessedLetters.includes(char) ? char : '_'))
+            .join('');
 
         return {
             ...super.getState(),
@@ -132,7 +150,7 @@ class Hangman extends BaseGame {
             guessedLetters: this.guessedLetters,
             lives: this.lives,
             scores: this.scores,
-            revealedWord: this.isGameOver ? this.word : null
+            revealedWord: this.isGameOver ? this.word : null,
         };
     }
 }

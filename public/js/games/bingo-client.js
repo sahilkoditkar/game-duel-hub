@@ -100,8 +100,8 @@ function initBingo(socket, container, roomId, playerIndex, initialState) {
         // Render board if not already
         if (!boardRendered && myBoard) {
             boardEl.innerHTML = '';
-            myBoard.forEach((row, r) => {
-                row.forEach((num, c) => {
+            myBoard.forEach((row) => {
+                row.forEach((num) => {
                     const cell = document.createElement('div');
                     cell.className = 'bingo-cell';
                     cell.textContent = num;
@@ -119,7 +119,7 @@ function initBingo(socket, container, roomId, playerIndex, initialState) {
 
         // Update marked cells
         if (boardRendered) {
-            document.querySelectorAll('.bingo-cell').forEach(cell => {
+            document.querySelectorAll('.bingo-cell').forEach((cell) => {
                 const num = parseInt(cell.dataset.num);
                 if (selectedSet.has(num)) {
                     cell.classList.add('marked');
@@ -144,13 +144,13 @@ function initBingo(socket, container, roomId, playerIndex, initialState) {
                 statusEl.textContent = msg;
                 showStatus(msg);
             } else {
-                const msg = winner === myIdx ? "BINGO! You Won!" : "You Lost! Opponent got BINGO!";
+                const msg = winner === myIdx ? 'BINGO! You Won!' : 'You Lost! Opponent got BINGO!';
                 statusEl.textContent = msg;
                 showStatus(msg);
             }
         } else {
-            statusEl.textContent = activePlayerIndex === myIdx ? "Your Turn" : "Opponent's Turn";
-            statusEl.style.color = activePlayerIndex === myIdx ? "#4caf50" : "#fff";
+            statusEl.textContent = activePlayerIndex === myIdx ? 'Your Turn' : "Opponent's Turn";
+            statusEl.style.color = activePlayerIndex === myIdx ? '#4caf50' : '#fff';
         }
     }
 }

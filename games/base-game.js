@@ -9,7 +9,7 @@ class BaseGame {
     }
 
     // Abstract method: handle player move
-    makeMove(playerIndex, move) {
+    makeMove(_playerIndex, _move) {
         throw new Error("Method 'makeMove' must be implemented.");
     }
 
@@ -27,16 +27,16 @@ class BaseGame {
     getState() {
         return {
             id: this.id,
-            players: this.players.map(p => p.id),
+            players: this.players.map((p) => p.id),
             gameState: this.gameState,
             activePlayerIndex: this.activePlayerIndex,
             isGameOver: this.isGameOver,
-            winner: this.winner
+            winner: this.winner,
         };
     }
 
     broadcast(event, data) {
-        this.players.forEach(p => p.emit(event, data));
+        this.players.forEach((p) => p.emit(event, data));
     }
 
     emitState() {

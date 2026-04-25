@@ -137,7 +137,7 @@ function initDotsAndBoxes(socket, container, roomId, playerIndex, initialState) 
     boardEl.innerHTML = html;
 
     // Attach listeners
-    document.querySelectorAll('.hline').forEach(el => {
+    document.querySelectorAll('.hline').forEach((el) => {
         el.addEventListener('click', () => {
             if (el.classList.contains('taken')) return;
             const r = parseInt(el.dataset.r);
@@ -146,7 +146,7 @@ function initDotsAndBoxes(socket, container, roomId, playerIndex, initialState) 
         });
     });
 
-    document.querySelectorAll('.vline').forEach(el => {
+    document.querySelectorAll('.vline').forEach((el) => {
         el.addEventListener('click', () => {
             if (el.classList.contains('taken')) return;
             const r = parseInt(el.dataset.r);
@@ -173,15 +173,15 @@ function initDotsAndBoxes(socket, container, roomId, playerIndex, initialState) 
         if (isGameOver) {
             if (winner === 'draw') {
                 showStatus("It's a Draw!");
-                statusEl.textContent = "Draw!";
+                statusEl.textContent = 'Draw!';
             } else {
-                const msg = winner === myIdx ? "You Won!" : "You Lost!";
+                const msg = winner === myIdx ? 'You Won!' : 'You Lost!';
                 showStatus(msg);
                 statusEl.textContent = msg;
             }
         } else {
-            statusEl.textContent = activePlayerIndex === myIdx ? "Your Turn" : "Opponent's Turn";
-            statusEl.style.color = activePlayerIndex === myIdx ? "#4caf50" : "#fff";
+            statusEl.textContent = activePlayerIndex === myIdx ? 'Your Turn' : "Opponent's Turn";
+            statusEl.style.color = activePlayerIndex === myIdx ? '#4caf50' : '#fff';
         }
 
         // Update scores

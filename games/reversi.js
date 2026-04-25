@@ -18,15 +18,15 @@ class Reversi extends BaseGame {
         const { row, col } = moveData;
 
         if (!this.isTurn(playerIndex)) {
-            return { valid: false, message: "Not your turn" };
+            return { valid: false, message: 'Not your turn' };
         }
         if (this.isGameOver) {
-            return { valid: false, message: "Game is over" };
+            return { valid: false, message: 'Game is over' };
         }
 
         const flips = this.getFlips(row, col, playerIndex);
         if (flips.length === 0) {
-            return { valid: false, message: "Invalid move - no pieces to flip" };
+            return { valid: false, message: 'Invalid move - no pieces to flip' };
         }
 
         // Place piece and flip
@@ -57,7 +57,16 @@ class Reversi extends BaseGame {
         if (row < 0 || row >= 8 || col < 0 || col >= 8) return [];
         if (this.gameState.board[row][col] !== null) return [];
 
-        const directions = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+        const directions = [
+            [-1, -1],
+            [-1, 0],
+            [-1, 1],
+            [0, -1],
+            [0, 1],
+            [1, -1],
+            [1, 0],
+            [1, 1],
+        ];
         const allFlips = [];
 
         for (const [dr, dc] of directions) {
@@ -65,13 +74,26 @@ class Reversi extends BaseGame {
             let r = row + dr;
             let c = col + dc;
 
-            while (r >= 0 && r < 8 && c >= 0 && c < 8 && this.gameState.board[r][c] === (1 - player)) {
+            while (
+                r >= 0 &&
+                r < 8 &&
+                c >= 0 &&
+                c < 8 &&
+                this.gameState.board[r][c] === 1 - player
+            ) {
                 flips.push([r, c]);
                 r += dr;
                 c += dc;
             }
 
-            if (flips.length > 0 && r >= 0 && r < 8 && c >= 0 && c < 8 && this.gameState.board[r][c] === player) {
+            if (
+                flips.length > 0 &&
+                r >= 0 &&
+                r < 8 &&
+                c >= 0 &&
+                c < 8 &&
+                this.gameState.board[r][c] === player
+            ) {
                 allFlips.push(...flips);
             }
         }
@@ -93,7 +115,8 @@ class Reversi extends BaseGame {
 
     endGame() {
         this.isGameOver = true;
-        let count0 = 0, count1 = 0;
+        let count0 = 0,
+            count1 = 0;
         for (let r = 0; r < 8; r++) {
             for (let c = 0; c < 8; c++) {
                 if (this.gameState.board[r][c] === 0) count0++;
@@ -110,12 +133,12 @@ class Reversi extends BaseGame {
     getState() {
         const validMoves = this.isGameOver ? [] : this.getValidMoves(this.activePlayerIndex);
         return {
-            board: this.gameState.board.map(row => [...row]),
+            board: this.gameState.board.map((row) => [...row]),
             validMoves,
             activePlayerIndex: this.activePlayerIndex,
             isGameOver: this.isGameOver,
             winner: this.winner,
-            finalScores: this.gameState.finalScores || null
+            finalScores: this.gameState.finalScores || null,
         };
     }
 }

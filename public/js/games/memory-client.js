@@ -163,13 +163,14 @@ function initMemory(socket, container, roomId, playerIndex, initialState) {
                 statusEl.textContent = "It's a Draw!";
                 showStatus("It's a Draw!");
             } else {
-                const msg = winner === myIdx ? "You Won!" : "You Lost!";
+                const msg = winner === myIdx ? 'You Won!' : 'You Lost!';
                 statusEl.textContent = msg;
                 showStatus(msg);
             }
         } else {
-            statusEl.textContent = activePlayerIndex === myIdx ? "Your Turn - Pick a card!" : "Opponent's Turn";
-            statusEl.style.color = activePlayerIndex === myIdx ? "#4caf50" : "#fff";
+            statusEl.textContent =
+                activePlayerIndex === myIdx ? 'Your Turn - Pick a card!' : "Opponent's Turn";
+            statusEl.style.color = activePlayerIndex === myIdx ? '#4caf50' : '#fff';
         }
     }
 }

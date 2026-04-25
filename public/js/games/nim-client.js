@@ -150,15 +150,16 @@ function initNim(socket, container, roomId, playerIndex, initialState) {
                 statusEl.textContent = "It's a Draw!";
                 showStatus("It's a Draw!");
             } else {
-                const msg = state.winner === myIdx ? "You Won!" : "You Lost!";
+                const msg = state.winner === myIdx ? 'You Won!' : 'You Lost!';
                 statusEl.textContent = msg;
                 showStatus(msg);
             }
             confirmBtn.disabled = true;
             clearBtn.disabled = true;
         } else {
-            statusEl.textContent = state.activePlayerIndex === myIdx ? "Your Turn" : "Opponent's Turn";
-            statusEl.style.color = state.activePlayerIndex === myIdx ? "#4caf50" : "#fff";
+            statusEl.textContent =
+                state.activePlayerIndex === myIdx ? 'Your Turn' : "Opponent's Turn";
+            statusEl.style.color = state.activePlayerIndex === myIdx ? '#4caf50' : '#fff';
         }
 
         renderBoard();
@@ -189,7 +190,7 @@ function initNim(socket, container, roomId, playerIndex, initialState) {
                 if (i >= count) {
                     // This stone has been removed
                     stone.classList.add('removed');
-                } else if (selectedRow === rowIdx && i >= (count - selectedCount)) {
+                } else if (selectedRow === rowIdx && i >= count - selectedCount) {
                     // This stone is selected for removal
                     stone.classList.add('selected');
                 }

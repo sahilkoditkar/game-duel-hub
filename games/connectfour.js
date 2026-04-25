@@ -8,7 +8,7 @@ class ConnectFour extends BaseGame {
         this.cols = 7;
         this.gameState = {
             board: Array.from({ length: this.rows }, () => Array(this.cols).fill(null)),
-            symbols: ['R', 'Y'] // Red and Yellow
+            symbols: ['R', 'Y'], // Red and Yellow
         };
     }
 
@@ -16,13 +16,13 @@ class ConnectFour extends BaseGame {
         const { col } = moveData;
 
         if (!this.isTurn(playerIndex)) {
-            return { valid: false, message: "Not your turn" };
+            return { valid: false, message: 'Not your turn' };
         }
         if (this.isGameOver) {
-            return { valid: false, message: "Game is over" };
+            return { valid: false, message: 'Game is over' };
         }
         if (col < 0 || col >= this.cols) {
-            return { valid: false, message: "Invalid column" };
+            return { valid: false, message: 'Invalid column' };
         }
 
         // Find lowest empty row in column
@@ -35,7 +35,7 @@ class ConnectFour extends BaseGame {
         }
 
         if (row === -1) {
-            return { valid: false, message: "Column is full" };
+            return { valid: false, message: 'Column is full' };
         }
 
         const symbol = this.gameState.symbols[playerIndex];
@@ -57,10 +57,10 @@ class ConnectFour extends BaseGame {
 
     checkWin(row, col, symbol) {
         const directions = [
-            [0, 1],  // horizontal
-            [1, 0],  // vertical
-            [1, 1],  // diagonal down-right
-            [1, -1]  // diagonal down-left
+            [0, 1], // horizontal
+            [1, 0], // vertical
+            [1, 1], // diagonal down-right
+            [1, -1], // diagonal down-left
         ];
 
         for (const [dr, dc] of directions) {
@@ -69,7 +69,13 @@ class ConnectFour extends BaseGame {
             for (let i = 1; i < 4; i++) {
                 const r = row + dr * i;
                 const c = col + dc * i;
-                if (r >= 0 && r < this.rows && c >= 0 && c < this.cols && this.gameState.board[r][c] === symbol) {
+                if (
+                    r >= 0 &&
+                    r < this.rows &&
+                    c >= 0 &&
+                    c < this.cols &&
+                    this.gameState.board[r][c] === symbol
+                ) {
                     count++;
                 } else break;
             }
@@ -77,7 +83,13 @@ class ConnectFour extends BaseGame {
             for (let i = 1; i < 4; i++) {
                 const r = row - dr * i;
                 const c = col - dc * i;
-                if (r >= 0 && r < this.rows && c >= 0 && c < this.cols && this.gameState.board[r][c] === symbol) {
+                if (
+                    r >= 0 &&
+                    r < this.rows &&
+                    c >= 0 &&
+                    c < this.cols &&
+                    this.gameState.board[r][c] === symbol
+                ) {
                     count++;
                 } else break;
             }
@@ -87,7 +99,7 @@ class ConnectFour extends BaseGame {
     }
 
     isBoardFull() {
-        return this.gameState.board[0].every(cell => cell !== null);
+        return this.gameState.board[0].every((cell) => cell !== null);
     }
 
     getState() {
@@ -96,7 +108,7 @@ class ConnectFour extends BaseGame {
             symbols: this.gameState.symbols,
             activePlayerIndex: this.activePlayerIndex,
             isGameOver: this.isGameOver,
-            winner: this.winner
+            winner: this.winner,
         };
     }
 }
