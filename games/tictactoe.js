@@ -20,6 +20,9 @@ class TicTacToe extends BaseGame {
         if (this.isGameOver) {
             return { valid: false, message: "Game is over" };
         }
+        if (!Number.isInteger(index) || index < 0 || index > 8) {
+            return { valid: false, message: "Invalid cell" };
+        }
         if (this.gameState.board[index] !== null) {
             return { valid: false, message: "Invalid move" };
         }

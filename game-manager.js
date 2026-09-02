@@ -13,30 +13,71 @@ const GAME_REGISTRY = {
     memory: { module: './games/memory' },
     wordchain: { module: './games/wordchain', special: 'wordchain' },
     reversi: { module: './games/reversi' },
-    checkers: { module: './games/checkers' }
+    checkers: { module: './games/checkers' },
+    rps: { module: './games/rps' }
 };
+
+function sanitizeName(name, fallback) {
+    if (typeof name !== 'string') return fallback;
+    const trimmed = name.trim().slice(0, 16);
+    return trimmed || fallback;
+}
 
 class GameManager {
     constructor(io) {
         this.io = io;
-        this.rooms = new Map(); // roomId -> { players: [socket], game: GameInstance, type: 'tictactoe' }
+        this.rooms = new Map(); // roomId -> room
+        this.socketRoom = new Map(); // socket.id -> roomId
     }
 
-    createRoom(socket, gameType) {
-        const roomId = uuidv4().substring(0, 6).toUpperCase(); // Short code
+    findRoomIdForSocket(socket) {
+        return this.socketRoom.get(socket.id) || null;
+    }
+
+    leaveCurrentRoom(socket) {
+        const existing = this.findRoomIdForSocket(socket);
+        if (existing) {
+            this.handleDisconnect(socket);
+        }
+    }
+
+    createRoom(socket, gameType, playerName) {
+        if (!GAME_REGISTRY[gameType]) {
+            socket.emit('error', 'Unknown game type');
+            return;
+        }
+
+        this.leaveCurrentRoom(socket);
+
+        let roomId;
+        do {
+            roomId = uuidv4().substring(0, 6).toUpperCase();
+        } while (this.rooms.has(roomId));
+
+        const name = sanitizeName(playerName, 'Player 1');
+
         this.rooms.set(roomId, {
             players: [socket],
+            names: [name, 'Player 2'],
             game: null,
             type: gameType,
             status: 'waiting',
-            scores: [0, 0] // [p1, p2]
+            scores: [0, 0],
+            playAgain: [false, false]
         });
+        this.socketRoom.set(socket.id, roomId);
         socket.join(roomId);
-        socket.emit('room_created', { roomId, gameType });
+        socket.emit('room_created', { roomId, gameType, playerIndex: 0, names: [name, 'Player 2'] });
         console.log(`Room ${roomId} created by ${socket.id} for ${gameType}`);
     }
 
-    joinRoom(socket, roomId) {
+    joinRoom(socket, roomId, playerName) {
+        if (typeof roomId !== 'string') {
+            socket.emit('error', 'Room not found');
+            return;
+        }
+        roomId = roomId.trim().toUpperCase();
+
         const room = this.rooms.get(roomId);
         if (!room) {
             socket.emit('error', 'Room not found');
@@ -48,19 +89,35 @@ class GameManager {
             return;
         }
 
+        const existing = this.findRoomIdForSocket(socket);
+        if (existing === roomId) {
+            socket.emit('error', 'You are already in this room');
+            return;
+        }
+
+        this.leaveCurrentRoom(socket);
+
+        room.names[1] = sanitizeName(playerName, 'Player 2');
         room.players.push(socket);
+        this.socketRoom.set(socket.id, roomId);
         socket.join(roomId);
         room.status = 'ready';
+        room.playAgain = [false, false];
 
-        // Notify both players
-        this.io.to(roomId).emit('player_joined', { playerId: socket.id });
+        this.io.to(roomId).emit('player_joined', {
+            playerId: socket.id,
+            names: room.names
+        });
 
-        // Notify the joiner specifically to switch UI
-        socket.emit('room_joined', { roomId, gameType: room.type });
+        socket.emit('room_joined', {
+            roomId,
+            gameType: room.type,
+            playerIndex: 1,
+            names: room.names
+        });
 
         console.log(`User ${socket.id} joined room ${roomId}`);
 
-        // Start game
         this.startGame(roomId, 0);
     }
 
@@ -70,8 +127,13 @@ class GameManager {
 
         console.log(`Starting game in room ${roomId} (Type: ${room.type})`);
 
-        // Store who started this game
+        if (room.game && typeof room.game.cleanup === 'function') {
+            room.game.cleanup();
+        }
+
         room.lastStarterIndex = startingPlayerIndex;
+        room.playAgain = [false, false];
+        room.status = 'playing';
 
         const entry = GAME_REGISTRY[room.type];
         if (!entry) {
@@ -81,7 +143,6 @@ class GameManager {
 
         const GameClass = require(entry.module);
 
-        // Special constructor handling
         if (entry.special === 'hangman') {
             if (!room.usedWords) room.usedWords = [];
             room.game = new GameClass(roomId, room.players, startingPlayerIndex, room.usedWords);
@@ -95,21 +156,26 @@ class GameManager {
             room.game = new GameClass(roomId, room.players, startingPlayerIndex);
         }
 
-        // Broadcast initial state
-        const initialState = room.game.getState();
+        room.game.onGameOver = () => {
+            if (room.game.winner !== 'draw' && room.game.winner !== null) {
+                room.scores[room.game.winner]++;
+            }
+            this.io.to(roomId).emit('score_update', room.scores);
+        };
 
-        // Notify players of start and assignment
         room.players.forEach((p, index) => {
             p.emit('game_start', {
                 roomId,
                 playerIndex: index,
                 gameType: room.type,
-                initialState
+                names: room.names,
+                initialState: room.game.getStateForPlayer(index)
             });
         });
 
         setTimeout(() => {
-            room.game.emitState(); // Ensure state is emitted after start
+            if (!room.game) return;
+            room.game.emitState();
             this.io.to(roomId).emit('score_update', room.scores);
         }, 0);
     }
@@ -120,28 +186,34 @@ class GameManager {
 
         if (!room || !room.game) return;
 
-        // Find player index
         const playerIndex = room.players.indexOf(socket);
         if (playerIndex === -1) return;
 
         const result = room.game.makeMove(playerIndex, move);
-        if (!result.valid) {
-            socket.emit('invalid_move', result.message);
-            return;
-        }
-
-        if (room.game.isGameOver) {
-            if (room.game.winner !== 'draw') {
-                room.scores[room.game.winner]++;
-            }
-            this.io.to(roomId).emit('score_update', room.scores);
+        if (!result || !result.valid) {
+            socket.emit('invalid_move', (result && result.message) || 'Invalid move');
         }
     }
 
     handleRestart(socket, data) {
         const { roomId } = data;
         const room = this.rooms.get(roomId);
-        if (!room) return;
+        if (!room || room.players.length !== 2) return;
+
+        const playerIndex = room.players.indexOf(socket);
+        if (playerIndex === -1) return;
+
+        if (!room.playAgain) room.playAgain = [false, false];
+        room.playAgain[playerIndex] = true;
+
+        this.io.to(roomId).emit('play_again_status', {
+            ready: room.playAgain,
+            names: room.names
+        });
+
+        if (!(room.playAgain[0] && room.playAgain[1])) {
+            return;
+        }
 
         console.log(`Restarting game in room ${roomId}`);
 
@@ -165,28 +237,39 @@ class GameManager {
     }
 
     handleDisconnect(socket) {
-        // Find room where socket is present
-        for (const [roomId, room] of this.rooms) {
+        const mappedRoomId = this.socketRoom.get(socket.id);
+        this.socketRoom.delete(socket.id);
+
+        const roomsToScan = mappedRoomId ? [[mappedRoomId, this.rooms.get(mappedRoomId)]] : [...this.rooms];
+
+        for (const [roomId, room] of roomsToScan) {
+            if (!room) continue;
             const index = room.players.indexOf(socket);
-            if (index !== -1) {
-                room.players.splice(index, 1);
-                this.io.to(roomId).emit('player_left', { playerId: socket.id });
+            if (index === -1) continue;
 
-                // Clean up timer for wordchain
-                if (room.game && room.game.cleanup) {
-                    room.game.cleanup();
-                }
+            room.players.splice(index, 1);
+            socket.leave(roomId);
 
-                // End game if running
-                if (room.game) {
-                    this.rooms.delete(roomId);
-                } else if (room.players.length === 0) {
-                    this.rooms.delete(roomId);
-                }
-                break;
+            if (room.game && typeof room.game.cleanup === 'function') {
+                room.game.cleanup();
             }
+            room.game = null;
+            room.status = 'abandoned';
+            room.playAgain = [false, false];
+
+            this.io.to(roomId).emit('player_left', {
+                playerId: socket.id,
+                playerIndex: index,
+                names: room.names
+            });
+
+            if (room.players.length === 0) {
+                this.rooms.delete(roomId);
+            }
+            break;
         }
     }
 }
 
 module.exports = GameManager;
+module.exports.GAME_REGISTRY = GAME_REGISTRY;

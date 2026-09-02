@@ -18,10 +18,13 @@ const gameManager = new GameManager(io);
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
-    socket.on('create_room', (data) => gameManager.createRoom(socket, data.gameType));
-    socket.on('join_room', (data) => gameManager.joinRoom(socket, data.roomId));
+    socket.on('create_room', (data = {}) => {
+        gameManager.createRoom(socket, data.gameType, data.playerName);
+    });
+    socket.on('join_room', (data = {}) => {
+        gameManager.joinRoom(socket, data.roomId, data.playerName);
+    });
 
-    // Game events
     socket.on('make_move', (data) => gameManager.handleMove(socket, data));
     socket.on('play_again', (data) => gameManager.handleRestart(socket, data));
 

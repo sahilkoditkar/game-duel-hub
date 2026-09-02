@@ -147,9 +147,24 @@ class Battleship extends BaseGame {
         // For now, let's just stick to win/loss.
     }
 
+    hideShips(grid) {
+        return grid.map(row => row.map(cell => (cell === 1 ? 0 : cell)));
+    }
+
     getState() {
         return {
             grids: this.grids,
+            activePlayerIndex: this.activePlayerIndex,
+            isGameOver: this.isGameOver,
+            winner: this.winner
+        };
+    }
+
+    getStateForPlayer(playerIndex) {
+        return {
+            grids: this.grids.map((grid, i) => (
+                i === playerIndex ? grid : this.hideShips(grid)
+            )),
             activePlayerIndex: this.activePlayerIndex,
             isGameOver: this.isGameOver,
             winner: this.winner

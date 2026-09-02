@@ -6,6 +6,8 @@ class BaseGame {
         this.activePlayerIndex = startingPlayerIndex; // 0 or 1
         this.isGameOver = false;
         this.winner = null;
+        this.onGameOver = null;
+        this._gameOverNotified = false;
     }
 
     // Abstract method: handle player move
@@ -35,12 +37,27 @@ class BaseGame {
         };
     }
 
+    // Per-player view (hide secrets). Defaults to public state.
+    getStateForPlayer(_playerIndex) {
+        return this.getState();
+    }
+
     broadcast(event, data) {
         this.players.forEach(p => p.emit(event, data));
     }
 
     emitState() {
-        this.broadcast('game_state', this.getState());
+        this.players.forEach((p, index) => {
+            p.emit('game_state', this.getStateForPlayer(index));
+        });
+        this.notifyGameOver();
+    }
+
+    notifyGameOver() {
+        if (this.isGameOver && !this._gameOverNotified && typeof this.onGameOver === 'function') {
+            this._gameOverNotified = true;
+            this.onGameOver();
+        }
     }
 }
 
