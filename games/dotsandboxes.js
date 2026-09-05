@@ -1,8 +1,8 @@
 const BaseGame = require('./base-game');
 
 class DotsAndBoxes extends BaseGame {
-    constructor(roomId, players) {
-        super(roomId, players);
+    constructor(roomId, players, startingPlayerIndex) {
+        super(roomId, players, startingPlayerIndex);
         // 4x4 dots = 3x3 boxes
         // Horizontal lines: 4 rows x 3 cols = 12 lines
         // Vertical lines: 3 rows x 4 cols = 12 lines
@@ -16,7 +16,6 @@ class DotsAndBoxes extends BaseGame {
         this.boxes = new Array(3).fill(0).map(() => new Array(3).fill(null));         // [row][col] -> owner playerIndex
 
         this.scores = [0, 0];
-        this.activePlayerIndex = 0;
         this.isGameOver = false;
         this.winner = null;
     }

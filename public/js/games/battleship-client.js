@@ -152,7 +152,10 @@ function initBattleship(socket, container, roomId, playerIndex, initialState) {
     socket.off('invalid_move');
 
     socket.on('game_state', (data) => render(data));
-    socket.on('invalid_move', (msg) => alert(msg));
+    socket.on('invalid_move', (msg) => {
+        if (typeof showToast === 'function') showToast(msg);
+        else alert(msg);
+    });
 
     // Render immediately
     if (initialState) {

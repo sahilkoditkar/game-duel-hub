@@ -73,7 +73,8 @@ function initTicTacToe(socket, container, roomId, playerIndex, initialState) {
     });
 
     socket.on('invalid_move', (msg) => {
-        alert(msg);
+        if (typeof showToast === 'function') showToast(msg);
+        else alert(msg);
     });
 
     if (initialState) {

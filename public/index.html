@@ -14,10 +14,18 @@
             <a href="/">
                 <h1>Game Hub</h1>
             </a>
-            <p>Play games</p>
+            <p>Two-player games in the browser</p>
         </header>
 
         <main id="lobby-view">
+            <div class="card">
+                <h2>Your name</h2>
+                <div class="form-group">
+                    <label for="player-name-input">Shown on the scoreboard</label>
+                    <input type="text" id="player-name-input" placeholder="Player" maxlength="16" autocomplete="nickname">
+                </div>
+            </div>
+
             <div class="card">
                 <h2>Create Room</h2>
                 <div class="form-group">
@@ -35,6 +43,7 @@
                         <option value="wordchain">Word Chain</option>
                         <option value="reversi">Reversi (Othello)</option>
                         <option value="checkers">Checkers</option>
+                        <option value="rps">Rock Paper Scissors</option>
                     </select>
                 </div>
                 <button id="create-btn" class="btn primary">Create Room</button>
@@ -44,7 +53,7 @@
                 <h2>Join Room</h2>
                 <div class="form-group">
                     <label for="room-id-input">Room ID</label>
-                    <input type="text" id="room-id-input" placeholder="Enter 6-character code" maxlength="6">
+                    <input type="text" id="room-id-input" placeholder="Enter 6-character code" maxlength="6" autocapitalize="characters" autocomplete="off">
                 </div>
                 <button id="join-btn" class="btn secondary">Join Room</button>
             </div>
@@ -53,9 +62,15 @@
         <div id="game-container" class="hidden">
             <div class="game-header">
                 <div id="scoreboard">
-                    P1: <span id="s1">0</span> - P2: <span id="s2">0</span>
+                    <span id="n1">P1</span>: <span id="s1">0</span> — <span id="n2">P2</span>: <span id="s2">0</span>
                 </div>
-                <span id="room-info">Room: <span id="current-room-id">...</span></span>
+                <div class="room-actions">
+                    <span id="player-badge">You</span>
+                    <span id="current-game-name" class="game-title"></span>
+                    <span id="room-info">Room: <span id="current-room-id">...</span></span>
+                    <button type="button" id="copy-room-btn" class="btn small ghost">Copy</button>
+                    <button type="button" id="share-room-btn" class="btn small ghost">Invite</button>
+                </div>
             </div>
             <div id="game-area">
                 <!-- Game content will be injected here -->
@@ -66,12 +81,15 @@
     <div id="game-over-modal" class="modal hidden">
         <div class="modal-content">
             <h2 id="modal-message">Game Over</h2>
+            <p id="modal-hint" class="modal-hint"></p>
             <div class="modal-controls">
                 <button id="modal-play-again" class="btn primary">Play Again</button>
                 <button id="modal-leave" class="btn secondary">Leave Room</button>
             </div>
         </div>
     </div>
+
+    <div id="toast" class="toast hidden" role="status"></div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/main.js"></script>

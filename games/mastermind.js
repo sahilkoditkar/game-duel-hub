@@ -113,6 +113,11 @@ class Mastermind extends BaseGame {
     }
 
     getState() {
+        return this.getStateForPlayer(this.makerIndex);
+    }
+
+    getStateForPlayer(playerIndex) {
+        const canSeeSecret = playerIndex === this.makerIndex || this.isGameOver;
         const state = super.getState();
 
         return {
@@ -121,8 +126,7 @@ class Mastermind extends BaseGame {
             makerIndex: this.makerIndex,
             guesses: this.guesses,
             maxAttempts: this.maxAttempts,
-            secretCode: this.secretCode, // Send always. Client uses it if Maker.
-            // Add a flag to confirm setup is done
+            secretCode: canSeeSecret ? this.secretCode : [],
             isSetupDone: this.phase === 'PLAYING'
         };
     }

@@ -305,3 +305,53 @@ select:focus {
     justify-content: center;
     align-items: center;
 }
+
+.room-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+#player-badge,
+.game-title {
+    font-size: 0.85rem;
+    color: #aaa;
+}
+
+.btn.ghost {
+    background: #333;
+    color: var(--text-color);
+}
+
+.btn.small.ghost {
+    padding: 6px 10px;
+}
+
+.modal-hint {
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+    min-height: 1.2em;
+}
+
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    background: #2c2c2c;
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 10px;
+    border: 1px solid #444;
+    z-index: 1100;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    max-width: min(90vw, 420px);
+    text-align: center;
+}
+
+.toast.hidden {
+    display: none;
+}
