@@ -1,21 +1,12 @@
 const { v4: uuidv4 } = require('uuid');
 
-// Game registry - add new games here
-const GAME_REGISTRY = {
-    tictactoe: { module: './games/tictactoe' },
-    dotsandboxes: { module: './games/dotsandboxes' },
-    bingo: { module: './games/bingo' },
-    battleship: { module: './games/battleship' },
-    hangman: { module: './games/hangman', special: 'hangman' },
-    mastermind: { module: './games/mastermind', special: 'mastermind' },
-    connectfour: { module: './games/connectfour' },
-    nim: { module: './games/nim' },
-    memory: { module: './games/memory' },
-    wordchain: { module: './games/wordchain', special: 'wordchain' },
-    reversi: { module: './games/reversi' },
-    checkers: { module: './games/checkers' },
-    rps: { module: './games/rps' }
-};
+// Game registry is derived from the shared catalog (public/js/catalog.js), which the
+// browser also loads to build the lobby. Add new games there.
+const CATALOG = require('./public/js/catalog.js');
+const GAME_REGISTRY = {};
+for (const game of CATALOG.GAMES) {
+    GAME_REGISTRY[game.id] = { module: `./games/${game.id}`, special: game.special, label: game.label, category: game.category };
+}
 
 // How long a disconnected player keeps their seat before the room gives up on them.
 const RECONNECT_GRACE_MS = 60 * 1000;
