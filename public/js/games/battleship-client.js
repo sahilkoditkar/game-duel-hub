@@ -146,6 +146,7 @@ function initBattleship(socket, container, roomId, playerIndex, initialState) {
     const statusEl = document.getElementById('game-status');
     const myIdx = playerIndex;
     const oppIdx = 1 - playerIndex;
+    let lastState = initialState || null;
 
     // Cleanup
     socket.off('game_state');
@@ -163,6 +164,7 @@ function initBattleship(socket, container, roomId, playerIndex, initialState) {
     }
 
     function render(state) {
+        lastState = state;
         const { grids, activePlayerIndex, isGameOver, winner } = state;
         const myGridData = grids[myIdx];
         const oppGridData = grids[oppIdx];
@@ -204,6 +206,7 @@ function initBattleship(socket, container, roomId, playerIndex, initialState) {
                 if (isTarget) {
                     cell.addEventListener('click', () => {
                         if (cellVal === 2 || cellVal === 3) return;
+                        if (!canAct(lastState, myIdx)) return;
                         socket.emit('make_move', { roomId, move: { row: r, col: c } });
                     });
                 }

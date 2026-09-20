@@ -17,10 +17,10 @@ class Nim extends BaseGame {
         if (this.isGameOver) {
             return { valid: false, message: "Game is over" };
         }
-        if (row < 0 || row >= this.gameState.rows.length) {
+        if (!BaseGame.isIntInRange(row, 0, this.gameState.rows.length - 1)) {
             return { valid: false, message: "Invalid row" };
         }
-        if (count < 1 || count > this.gameState.rows[row]) {
+        if (!BaseGame.isIntInRange(count, 1, this.gameState.rows[row])) {
             return { valid: false, message: "Invalid number to remove" };
         }
 

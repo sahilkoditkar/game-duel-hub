@@ -38,8 +38,13 @@ class Checkers extends BaseGame {
             return { valid: false, message: "Game is over" };
         }
 
+        const coords = [fromRow, fromCol, toRow, toCol];
+        if (!coords.every(v => BaseGame.isIntInRange(v, 0, 7))) {
+            return { valid: false, message: "Out of bounds" };
+        }
+
         const board = this.gameState.board;
-        const piece = board[fromRow] && board[fromRow][fromCol];
+        const piece = board[fromRow][fromCol];
 
         if (!piece || piece.player !== playerIndex) {
             return { valid: false, message: "Not your piece" };

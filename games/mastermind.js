@@ -30,8 +30,8 @@ class Mastermind extends BaseGame {
         if (this.isGameOver) return { valid: false, message: 'Game is over' };
         if (playerIndex !== this.activePlayerIndex) return { valid: false, message: 'Not your turn' };
 
-        const { code } = move;
-        if (!Array.isArray(code) || code.length !== 4) {
+        const code = Array.isArray(move.code) ? move.code.map(Number) : null;
+        if (!code || code.length !== 4) {
             return { valid: false, message: 'Invalid code length' };
         }
 

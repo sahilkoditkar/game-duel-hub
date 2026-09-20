@@ -21,7 +21,7 @@ class ConnectFour extends BaseGame {
         if (this.isGameOver) {
             return { valid: false, message: "Game is over" };
         }
-        if (col < 0 || col >= this.cols) {
+        if (!BaseGame.isIntInRange(col, 0, this.cols - 1)) {
             return { valid: false, message: "Invalid column" };
         }
 

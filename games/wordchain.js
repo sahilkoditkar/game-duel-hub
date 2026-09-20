@@ -87,8 +87,41 @@ const WORDS = new Set([
     'trunk','trust','truth','tumor','twist','ultra','uncle','under','union','unite','unity','upper','upset','urban','usage','usual','valid',
     'valor','value','valve','vault','venue','verse','video','vigor','viral','virus','visit','vital','vivid','vocal','voice','voter','wagon',
     'waste','watch','water','weave','weigh','weird','wheat','wheel','where','which','while','white','whole','whose','widen','width','witch',
-    'woman','world','worry','worst','worth','would','wound','wrath','write','wrong','wrote','yield','young','youth'
+    'woman','world','worry','worst','worth','would','wound','wrath','write','wrong','wrote','yield','young','youth',
+    // Short common words so players are not stuck with 4-6 letter words only
+    'ace','act','add','age','ago','aid','aim','air','ale','all','and','ant','any','ape','apt','arc','are','ark','arm','art',
+    'ash','ask','ate','awe','axe','aye','bad','bag','ban','bar','bat','bay','bed','bee','beg','bet','bid','big','bin','bit',
+    'boa','bog','boo','bow','box','boy','bud','bug','bun','bus','but','buy','bye','cab','can','cap','car','cat','cog','con',
+    'cop','cot','cow','coy','cry','cub','cue','cup','cut','dab','dad','dam','day','den','dew','did','die','dig','dim','dip',
+    'dog','dot','dry','dub','dud','due','dug','dye','ear','eat','eel','egg','ego','elf','elk','elm','end','era','eve','ewe',
+    'eye','fad','fan','far','fat','fax','fed','fee','few','fig','fin','fir','fit','fix','flu','fly','foe','fog','for','fox',
+    'fry','fun','fur','gag','gap','gas','gel','gem','get','gig','gin','gnu','god','got','gum','gun','gut','guy','gym','had',
+    'ham','has','hat','hay','hem','hen','her','hew','hey','hid','him','hip','his','hit','hog','hop','hot','how','hub','hue',
+    'hug','hum','hut','ice','icy','ill','imp','ink','inn','ion','ire','irk','its','ivy','jab','jam','jar','jaw','jay','jet',
+    'jig','job','jog','jot','joy','jug','jut','keg','key','kid','kin','kit','lab','lad','lag','lap','law','lax','lay','led',
+    'leg','let','lid','lie','lip','lit','log','lot','low','lug','mad','man','map','mat','may','men','met','mid','mix','mob',
+    'mod','mom','mop','mow','mud','mug','nab','nag','nap','net','new','nil','nip','nod','nor','not','now','nun','nut','oak',
+    'oar','oat','odd','ode','off','oil','old','one','opt','orb','ore','our','out','owe','owl','own','pad','pal','pan','par',
+    'pat','paw','pay','pea','peg','pen','pep','per','pet','pew','pie','pig','pin','pit','ply','pod','pop','pot','pro','pry',
+    'pub','pug','pun','pup','put','rag','ram','ran','rap','rat','raw','ray','red','rib','rid','rig','rim','rip','rob','rod',
+    'roe','rot','row','rub','rug','rum','run','rut','rye','sad','sag','sap','sat','saw','say','sea','see','set','sew','she',
+    'shy','sin','sip','sir','sis','sit','six','ski','sky','sly','sob','sod','son','sow','soy','spa','spy','sty','sub','sue',
+    'sum','sun','tab','tag','tan','tap','tar','tax','tea','ten','the','thy','tie','tin','tip','toe','ton','too','top','tow',
+    'toy','try','tub','tug','two','ugh','urn','use','van','vat','vet','vex','via','vie','vow','wad','wag','war','was','wax',
+    'way','web','wed','wee','wet','who','why','wig','win','wit','woe','wok','won','woo','wow','wry','xenon','xerox','xylem','yacht',
+    'yak','yam','yap','yarn','yaw','yawn','yearn','yeast','yelp','yes','yet','yew','yin','yip','yoga','yoke','yolk','you','yummy','zany',
+    'zap','zebra','zed','zen','zest','zesty','zing','zip','zit','zonal','zoo'
 ]);
+
+const MIN_LENGTH = 3;
+const MAX_LENGTH = Math.max(...[...WORDS].map(w => w.length));
+
+// Index words by first letter so we can tell when a letter has run dry.
+const WORDS_BY_FIRST = new Map();
+for (const w of WORDS) {
+    if (!WORDS_BY_FIRST.has(w[0])) WORDS_BY_FIRST.set(w[0], []);
+    WORDS_BY_FIRST.get(w[0]).push(w);
+}
 
 class WordChain extends BaseGame {
     constructor(id, players, startingPlayerIndex, io) {
@@ -96,23 +129,55 @@ class WordChain extends BaseGame {
         this.io = io;
         this.turnTime = 15; // seconds per turn
         this.timer = null;
+        this.started = false; // the clock only runs once both clients are ready
+        this.paused = false;
         this.gameState = {
             words: [],
             usedWords: new Set(),
             lastLetter: null,
             timeLeft: this.turnTime,
-            message: ''
+            message: '',
+            minLength: MIN_LENGTH,
+            maxLength: MAX_LENGTH
         };
+    }
+
+    // Called by the GameManager once both players report ready (or after a fallback delay).
+    start() {
+        if (this.started || this.isGameOver) return;
+        this.started = true;
         this.startTurnTimer();
+        this.emitState();
+    }
+
+    // A player dropped: freeze the clock so nobody loses to a flaky network.
+    pause() {
+        if (!this.started || this.isGameOver) return;
+        this.paused = true;
+        this.clearTimer();
+        this.gameState.message = 'Paused - waiting for reconnection';
+        this.emitState();
+    }
+
+    resume() {
+        if (!this.started || this.isGameOver || !this.paused) return;
+        this.paused = false;
+        this.gameState.message = '';
+        this.runTimer();
+        this.emitState();
     }
 
     startTurnTimer() {
         this.clearTimer();
         this.gameState.timeLeft = this.turnTime;
+        if (!this.started || this.paused) return;
+        this.runTimer();
+    }
 
+    runTimer() {
+        this.clearTimer();
         this.timer = setInterval(() => {
             this.gameState.timeLeft--;
-            this.emitState();
 
             if (this.gameState.timeLeft <= 0) {
                 this.clearTimer();
@@ -120,8 +185,8 @@ class WordChain extends BaseGame {
                 this.isGameOver = true;
                 this.winner = 1 - this.activePlayerIndex;
                 this.gameState.message = 'Time ran out!';
-                this.emitState();
             }
+            this.emitState();
         }, 1000);
     }
 
@@ -136,39 +201,63 @@ class WordChain extends BaseGame {
         this.clearTimer();
     }
 
-    makeMove(playerIndex, moveData) {
-        const { word } = moveData;
+    hasUnusedWordStartingWith(letter) {
+        const candidates = WORDS_BY_FIRST.get(letter) || [];
+        return candidates.some(w => !this.gameState.usedWords.has(w));
+    }
 
+    makeMove(playerIndex, moveData) {
         if (!this.isTurn(playerIndex)) {
             return { valid: false, message: "Not your turn" };
         }
         if (this.isGameOver) {
             return { valid: false, message: "Game is over" };
         }
-
-        const cleanWord = word.trim().toLowerCase();
-
-        if (cleanWord.length < 2) {
-            return { valid: false, message: "Word too short (min 2 letters)" };
+        if (this.paused) {
+            return { valid: false, message: "Game is paused while your opponent reconnects" };
         }
 
-        if (!WORDS.has(cleanWord)) {
-            return { valid: false, message: "Not a valid word" };
+        const raw = moveData && moveData.word;
+        if (typeof raw !== 'string') {
+            return { valid: false, message: "Type a word" };
         }
+        const cleanWord = raw.trim().toLowerCase();
 
-        if (this.gameState.usedWords.has(cleanWord)) {
-            return { valid: false, message: "Word already used" };
+        if (!/^[a-z]+$/.test(cleanWord)) {
+            return { valid: false, message: "Letters only, one word" };
+        }
+        if (cleanWord.length < MIN_LENGTH) {
+            return { valid: false, message: `Word too short (min ${MIN_LENGTH} letters)` };
+        }
+        if (cleanWord.length > MAX_LENGTH) {
+            return { valid: false, message: `Word too long (max ${MAX_LENGTH} letters in our list)` };
         }
 
         if (this.gameState.lastLetter && cleanWord[0] !== this.gameState.lastLetter) {
             return { valid: false, message: `Word must start with '${this.gameState.lastLetter.toUpperCase()}'` };
         }
 
+        if (this.gameState.usedWords.has(cleanWord)) {
+            return { valid: false, message: "Word already used" };
+        }
+
+        if (!WORDS.has(cleanWord)) {
+            return { valid: false, message: `'${cleanWord}' is not in our word list (${MIN_LENGTH}-${MAX_LENGTH} letter common words)` };
+        }
+
         // Valid move
         this.gameState.words.push({ word: cleanWord, player: playerIndex });
         this.gameState.usedWords.add(cleanWord);
-        this.gameState.lastLetter = cleanWord[cleanWord.length - 1];
         this.gameState.message = '';
+
+        const nextLetter = cleanWord[cleanWord.length - 1];
+        if (this.hasUnusedWordStartingWith(nextLetter)) {
+            this.gameState.lastLetter = nextLetter;
+        } else {
+            // Nothing left that starts with this letter: never hand the opponent a forced loss.
+            this.gameState.lastLetter = null;
+            this.gameState.message = `No words left starting with '${nextLetter.toUpperCase()}' - any word allowed!`;
+        }
 
         this.switchTurn();
         this.startTurnTimer();
@@ -183,6 +272,10 @@ class WordChain extends BaseGame {
             lastLetter: this.gameState.lastLetter,
             timeLeft: this.gameState.timeLeft,
             message: this.gameState.message,
+            minLength: this.gameState.minLength,
+            maxLength: this.gameState.maxLength,
+            started: this.started,
+            paused: this.paused,
             activePlayerIndex: this.activePlayerIndex,
             isGameOver: this.isGameOver,
             winner: this.winner

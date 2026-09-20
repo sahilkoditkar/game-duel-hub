@@ -15,6 +15,11 @@ class BaseGame {
         throw new Error("Method 'makeMove' must be implemented.");
     }
 
+    // True when value is an integer within [min, max]. Rejects strings, floats, undefined.
+    static isIntInRange(value, min, max) {
+        return Number.isInteger(value) && value >= min && value <= max;
+    }
+
     // Check if it's player's turn
     isTurn(playerIndex) {
         return playerIndex === this.activePlayerIndex;

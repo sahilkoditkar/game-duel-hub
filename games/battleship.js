@@ -35,7 +35,7 @@ class Battleship extends BaseGame {
         const opponentIndex = 1 - playerIndex;
         const oppGrid = this.grids[opponentIndex];
 
-        if (row < 0 || row >= 10 || col < 0 || col >= 10) return { valid: false, message: 'Invalid coordinates' };
+        if (!BaseGame.isIntInRange(row, 0, 9) || !BaseGame.isIntInRange(col, 0, 9)) return { valid: false, message: 'Invalid coordinates' };
 
         const cell = oppGrid[row][col];
         if (cell === 2 || cell === 3) return { valid: false, message: 'Already fired here' };

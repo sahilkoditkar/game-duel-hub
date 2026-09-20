@@ -117,6 +117,7 @@ function initReversi(socket, container, roomId, playerIndex, initialState) {
     const count0El = document.getElementById('rv-count0');
     const count1El = document.getElementById('rv-count1');
     const myIdx = playerIndex;
+    let lastState = initialState || null;
 
     // Create 64 cells
     for (let r = 0; r < 8; r++) {
@@ -126,6 +127,7 @@ function initReversi(socket, container, roomId, playerIndex, initialState) {
             cell.dataset.row = r;
             cell.dataset.col = c;
             cell.addEventListener('click', () => {
+                if (!canAct(lastState, myIdx)) return;
                 socket.emit('make_move', { roomId, move: { row: r, col: c } });
             });
             boardEl.appendChild(cell);
@@ -136,11 +138,12 @@ function initReversi(socket, container, roomId, playerIndex, initialState) {
     socket.off('invalid_move');
 
     socket.on('game_state', (data) => render(data));
-    socket.on('invalid_move', (msg) => alert(msg));
+    socket.on('invalid_move', (msg) => { if (typeof showToast === 'function') showToast(msg); else alert(msg); });
 
     if (initialState) render(initialState);
 
     function render(state) {
+        lastState = state;
         const { board, validMoves, activePlayerIndex, isGameOver, winner, finalScores } = state;
 
         const validSet = new Set(validMoves.map(([r, c]) => `${r},${c}`));

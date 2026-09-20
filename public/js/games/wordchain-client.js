@@ -147,6 +147,7 @@ function initWordChain(socket, container, roomId, playerIndex, initialState) {
     const myCountEl = document.getElementById('wc-c-me');
     const oppCountEl = document.getElementById('wc-c-opp');
     const myIdx = playerIndex;
+    let lastServerMessage = null;
 
     function submitWord() {
         const word = inputEl.value.trim();
@@ -172,18 +173,19 @@ function initWordChain(socket, container, roomId, playerIndex, initialState) {
     if (initialState) render(initialState);
 
     function render(state) {
-        const { words, lastLetter, timeLeft, message, activePlayerIndex, isGameOver, winner } = state;
+        const { words, lastLetter, timeLeft, message, activePlayerIndex, isGameOver, winner, started, paused, minLength, maxLength } = state;
+        const lenHint = minLength && maxLength ? ` (${minLength}-${maxLength} letters)` : '';
 
         // Timer
-        timerEl.textContent = timeLeft;
+        timerEl.textContent = paused ? '\u23F8' : (started === false ? '\u2022\u2022\u2022' : timeLeft);
         timerEl.className = 'wc-timer';
-        if (timeLeft <= 5) timerEl.classList.add('urgent');
+        if (started !== false && !paused && timeLeft <= 5) timerEl.classList.add('urgent');
 
         // Hint
         if (lastLetter) {
             hintEl.innerHTML = `Next word must start with: <strong>${lastLetter}</strong>`;
         } else {
-            hintEl.textContent = 'Type any word to start!';
+            hintEl.textContent = `Type any word${lenHint}!`;
         }
 
         // Words list
@@ -205,16 +207,20 @@ function initWordChain(socket, container, roomId, playerIndex, initialState) {
 
         // Input state
         const isMyTurn = activePlayerIndex === myIdx;
-        inputEl.disabled = !isMyTurn || isGameOver;
-        submitEl.disabled = !isMyTurn || isGameOver;
+        inputEl.disabled = !isMyTurn || isGameOver || Boolean(paused);
+        submitEl.disabled = !isMyTurn || isGameOver || Boolean(paused);
 
         if (isMyTurn && !isGameOver) {
             inputEl.focus();
         }
 
         // Message
-        if (message) {
-            messageEl.textContent = message;
+        // Only touch the message line when the server's message changes, so a
+        // rejected-word notice is not wiped by the once-a-second clock tick.
+        const serverMsg = message || (started === false && !isGameOver ? 'Clock starts when both players are ready' : '');
+        if (serverMsg !== lastServerMessage) {
+            lastServerMessage = serverMsg;
+            messageEl.textContent = serverMsg;
         }
 
         // Status
