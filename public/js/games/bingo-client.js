@@ -83,9 +83,11 @@ function initBingo(socket, container, roomId, playerIndex, initialState) {
     socket.off('invalid_move');
 
     socket.on('game_state', (data) => render(data));
-    socket.on('invalid_move', (msg) => alert(msg));
+    socket.on('invalid_move', (msg) => { if (typeof showToast === 'function') showToast(msg); else alert(msg); });
 
     let boardRendered = false;
+    let lastState = initialState || null;
+    let latestSelected = new Set();
 
     // Render immediately if state provided
     if (initialState) {
@@ -94,8 +96,10 @@ function initBingo(socket, container, roomId, playerIndex, initialState) {
 
     function render(state) {
         const { boards, selectedNumbers, scores, activePlayerIndex, isGameOver, winner } = state;
+        lastState = state;
         const myBoard = boards[myIdx];
         const selectedSet = new Set(selectedNumbers);
+        latestSelected = selectedSet;
 
         // Render board if not already
         if (!boardRendered && myBoard) {
@@ -107,9 +111,9 @@ function initBingo(socket, container, roomId, playerIndex, initialState) {
                     cell.textContent = num;
                     cell.dataset.num = num;
                     cell.addEventListener('click', () => {
-                        if (!selectedSet.has(num)) {
-                            socket.emit('make_move', { roomId, move: { number: num } });
-                        }
+                        if (!canAct(lastState, myIdx)) return;
+                        if (latestSelected.has(num)) return;
+                        socket.emit('make_move', { roomId, move: { number: num } });
                     });
                     boardEl.appendChild(cell);
                 });

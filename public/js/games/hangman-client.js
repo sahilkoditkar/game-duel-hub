@@ -134,6 +134,7 @@ function initHangman(socket, gameArea, roomId, playerIndex, initialState) {
     socket.on('game_state', (state) => {
         renderState(state);
     });
+    socket.on('invalid_move', (msg) => { if (typeof showToast === 'function') showToast(msg); else alert(msg); });
 }
 
 // Add some styles dynamically for Hangman specific elements

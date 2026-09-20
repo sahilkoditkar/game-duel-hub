@@ -44,7 +44,7 @@ class Bingo extends BaseGame {
         if (playerIndex !== this.activePlayerIndex) return { valid: false, message: 'Not your turn' };
 
         const { number } = move;
-        if (!number || number < 1 || number > 25) return { valid: false, message: 'Invalid number' };
+        if (!BaseGame.isIntInRange(number, 1, 25)) return { valid: false, message: 'Invalid number' };
         if (this.selectedNumbers.has(number)) return { valid: false, message: 'Number already selected' };
 
         this.selectedNumbers.add(number);

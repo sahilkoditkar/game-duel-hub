@@ -136,7 +136,7 @@ function initCheckers(socket, container, roomId, playerIndex, initialState) {
         render(data);
     });
     socket.on('invalid_move', (msg) => {
-        alert(msg);
+        if (typeof showToast === 'function') showToast(msg); else alert(msg);
         selectedPiece = null;
         if (currentState) render(currentState);
     });

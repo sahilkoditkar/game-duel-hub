@@ -105,6 +105,7 @@ function initMemory(socket, container, roomId, playerIndex, initialState) {
     const s0El = document.getElementById('mem-s0');
     const s1El = document.getElementById('mem-s1');
     const myIdx = playerIndex;
+    let lastState = initialState || null;
 
     // Create 16 cards
     for (let i = 0; i < 16; i++) {
@@ -120,6 +121,9 @@ function initMemory(socket, container, roomId, playerIndex, initialState) {
         `;
 
         card.addEventListener('click', () => {
+            if (!canAct(lastState, myIdx)) return;
+            // Ignore taps while two cards are showing, or on cards already face up.
+            if (lastState && (lastState.flipped.length >= 2 || lastState.flipped.includes(i) || lastState.revealed[i])) return;
             socket.emit('make_move', { roomId, move: { index: i } });
         });
         boardEl.appendChild(card);
@@ -129,11 +133,12 @@ function initMemory(socket, container, roomId, playerIndex, initialState) {
     socket.off('invalid_move');
 
     socket.on('game_state', (data) => render(data));
-    socket.on('invalid_move', (msg) => alert(msg));
+    socket.on('invalid_move', (msg) => { if (typeof showToast === 'function') showToast(msg); else alert(msg); });
 
     if (initialState) render(initialState);
 
     function render(state) {
+        lastState = state;
         const { cards, revealed, flipped, scores, activePlayerIndex, isGameOver, winner } = state;
 
         // Update scores

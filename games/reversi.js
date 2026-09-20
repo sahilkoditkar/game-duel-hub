@@ -23,6 +23,9 @@ class Reversi extends BaseGame {
         if (this.isGameOver) {
             return { valid: false, message: "Game is over" };
         }
+        if (!BaseGame.isIntInRange(row, 0, 7) || !BaseGame.isIntInRange(col, 0, 7)) {
+            return { valid: false, message: "Invalid square" };
+        }
 
         const flips = this.getFlips(row, col, playerIndex);
         if (flips.length === 0) {

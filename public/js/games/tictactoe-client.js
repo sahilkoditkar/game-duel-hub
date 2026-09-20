@@ -50,6 +50,7 @@ function initTicTacToe(socket, container, roomId, playerIndex, initialState) {
     const boardEl = document.getElementById('board');
     const statusEl = document.getElementById('game-status');
     let myPlayerIndex = playerIndex;
+    let lastState = initialState || null;
     console.log('Initialized as player ' + myPlayerIndex);
 
     // Create cells
@@ -58,6 +59,8 @@ function initTicTacToe(socket, container, roomId, playerIndex, initialState) {
         cell.className = 'ttt-cell';
         cell.dataset.index = i;
         cell.addEventListener('click', () => {
+            if (!canAct(lastState, myPlayerIndex)) return;
+            if (lastState && lastState.gameState && lastState.gameState.board[i]) return;
             socket.emit('make_move', { roomId, move: { index: i } });
         });
         boardEl.appendChild(cell);
@@ -82,6 +85,7 @@ function initTicTacToe(socket, container, roomId, playerIndex, initialState) {
     }
 
     function render(state) {
+        lastState = state;
         const { gameState, activePlayerIndex, isGameOver, winner } = state;
         const board = gameState.board;
 

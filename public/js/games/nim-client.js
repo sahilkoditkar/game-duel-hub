@@ -113,6 +113,7 @@ function initNim(socket, container, roomId, playerIndex, initialState) {
     let selectedRow = -1;
     let selectedCount = 0;
     let currentRows = [1, 3, 5, 7];
+    let lastState = initialState || null;
 
     confirmBtn.addEventListener('click', () => {
         if (selectedRow === -1 || selectedCount === 0) return;
@@ -132,7 +133,7 @@ function initNim(socket, container, roomId, playerIndex, initialState) {
 
     socket.on('game_state', (data) => render(data));
     socket.on('invalid_move', (msg) => {
-        alert(msg);
+        if (typeof showToast === 'function') showToast(msg); else alert(msg);
         selectedRow = -1;
         selectedCount = 0;
         renderBoard();
@@ -141,6 +142,7 @@ function initNim(socket, container, roomId, playerIndex, initialState) {
     if (initialState) render(initialState);
 
     function render(state) {
+        lastState = state;
         currentRows = state.rows;
         selectedRow = -1;
         selectedCount = 0;
@@ -212,6 +214,7 @@ function initNim(socket, container, roomId, playerIndex, initialState) {
     }
 
     function handleStoneClick(rowIdx, stoneIdx, rowCount) {
+        if (!canAct(lastState, myIdx)) return;
         if (selectedRow !== -1 && selectedRow !== rowIdx) {
             // Switch to new row
             selectedRow = rowIdx;

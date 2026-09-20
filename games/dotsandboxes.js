@@ -29,11 +29,11 @@ class DotsAndBoxes extends BaseGame {
 
         // Validate coordinates
         if (type === 'h') {
-            if (row < 0 || row > 3 || col < 0 || col > 2) return { valid: false, message: 'Invalid coordinates' };
+            if (!BaseGame.isIntInRange(row, 0, 3) || !BaseGame.isIntInRange(col, 0, 2)) return { valid: false, message: 'Invalid coordinates' };
             if (this.horizontalLines[row][col] !== null) return { valid: false, message: 'Line already taken' };
             this.horizontalLines[row][col] = playerIndex;
         } else if (type === 'v') {
-            if (row < 0 || row > 2 || col < 0 || col > 3) return { valid: false, message: 'Invalid coordinates' };
+            if (!BaseGame.isIntInRange(row, 0, 2) || !BaseGame.isIntInRange(col, 0, 3)) return { valid: false, message: 'Invalid coordinates' };
             if (this.verticalLines[row][col] !== null) return { valid: false, message: 'Line already taken' };
             this.verticalLines[row][col] = playerIndex;
         } else {

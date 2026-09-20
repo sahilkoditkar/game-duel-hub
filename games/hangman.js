@@ -12,7 +12,8 @@ class Hangman extends BaseGame {
         ];
 
         // Filter out used words
-        let availableWords = allWords.filter(w => !usedWords.includes(w));
+        const used = Array.isArray(usedWords) ? usedWords : [];
+        let availableWords = allWords.filter(w => !used.includes(w));
 
         // Reset if all words used
         if (availableWords.length === 0) {
@@ -40,6 +41,9 @@ class Hangman extends BaseGame {
         }
 
         letter = letter.toUpperCase();
+        if (!/^[A-Z]$/.test(letter)) {
+            return { valid: false, message: 'Guess a letter A-Z' };
+        }
 
         if (this.guessedLetters.includes(letter)) {
             return { valid: false, message: 'Letter already guessed' };

@@ -93,6 +93,7 @@ function initConnectFour(socket, container, roomId, playerIndex, initialState) {
     const indicatorEl = document.getElementById('cf-indicators');
     const statusEl = document.getElementById('game-status');
     const myIdx = playerIndex;
+    let lastState = initialState || null;
 
     // Create column indicators
     for (let c = 0; c < 7; c++) {
@@ -100,6 +101,7 @@ function initConnectFour(socket, container, roomId, playerIndex, initialState) {
         ind.className = 'cf-col-btn';
         ind.textContent = '\u25BC';
         ind.addEventListener('click', () => {
+            if (!canAct(lastState, myIdx)) return;
             socket.emit('make_move', { roomId, move: { col: c } });
         });
         indicatorEl.appendChild(ind);
@@ -113,7 +115,8 @@ function initConnectFour(socket, container, roomId, playerIndex, initialState) {
             cell.dataset.row = r;
             cell.dataset.col = c;
             cell.addEventListener('click', () => {
-                socket.emit('make_move', { roomId, move: { col: c } });
+                if (!canAct(lastState, myIdx)) return;
+            socket.emit('make_move', { roomId, move: { col: c } });
             });
             boardEl.appendChild(cell);
         }
@@ -123,11 +126,12 @@ function initConnectFour(socket, container, roomId, playerIndex, initialState) {
     socket.off('invalid_move');
 
     socket.on('game_state', (data) => render(data));
-    socket.on('invalid_move', (msg) => alert(msg));
+    socket.on('invalid_move', (msg) => { if (typeof showToast === 'function') showToast(msg); else alert(msg); });
 
     if (initialState) render(initialState);
 
     function render(state) {
+        lastState = state;
         const { board, activePlayerIndex, isGameOver, winner } = state;
 
         // Update board

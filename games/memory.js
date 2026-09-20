@@ -33,7 +33,7 @@ class Memory extends BaseGame {
         if (this.isGameOver) {
             return { valid: false, message: "Game is over" };
         }
-        if (index < 0 || index >= 16) {
+        if (!BaseGame.isIntInRange(index, 0, 15)) {
             return { valid: false, message: "Invalid card" };
         }
         if (this.gameState.revealed[index]) {

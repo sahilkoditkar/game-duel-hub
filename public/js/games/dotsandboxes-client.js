@@ -103,6 +103,7 @@ function initDotsAndBoxes(socket, container, roomId, playerIndex, initialState) 
     const score0El = document.getElementById('s-p0');
     const score1El = document.getElementById('s-p1');
     const myIdx = playerIndex;
+    let lastState = initialState || null;
 
     // Build the CSS Grid board
     // 7 rows, 7 cols: dots at even positions, lines/boxes at odd positions
@@ -140,6 +141,7 @@ function initDotsAndBoxes(socket, container, roomId, playerIndex, initialState) 
     document.querySelectorAll('.hline').forEach(el => {
         el.addEventListener('click', () => {
             if (el.classList.contains('taken')) return;
+            if (!canAct(lastState, myIdx)) return;
             const r = parseInt(el.dataset.r);
             const c = parseInt(el.dataset.c);
             socket.emit('make_move', { roomId, move: { type: 'h', row: r, col: c } });
@@ -149,6 +151,7 @@ function initDotsAndBoxes(socket, container, roomId, playerIndex, initialState) 
     document.querySelectorAll('.vline').forEach(el => {
         el.addEventListener('click', () => {
             if (el.classList.contains('taken')) return;
+            if (!canAct(lastState, myIdx)) return;
             const r = parseInt(el.dataset.r);
             const c = parseInt(el.dataset.c);
             socket.emit('make_move', { roomId, move: { type: 'v', row: r, col: c } });
@@ -160,13 +163,14 @@ function initDotsAndBoxes(socket, container, roomId, playerIndex, initialState) 
     socket.off('invalid_move');
 
     socket.on('game_state', (data) => render(data));
-    socket.on('invalid_move', (msg) => alert(msg));
+    socket.on('invalid_move', (msg) => { if (typeof showToast === 'function') showToast(msg); else alert(msg); });
 
     if (initialState) {
         render(initialState);
     }
 
     function render(state) {
+        lastState = state;
         const { hLines, vLines, boxes, scores, activePlayerIndex, isGameOver, winner } = state;
 
         // Update turn status
