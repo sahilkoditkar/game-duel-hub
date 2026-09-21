@@ -81,7 +81,7 @@ describe('Mancala sowing', () => {
         assert.equal(game.pits[13], 0);
         assert.deepEqual(game.pits, [5, 5, 5, 5, 5, 0, 7, 0, 5, 5, 5, 5, 5, 0]);
         assert.equal(game.lastMove.captured, 6);
-        assert.equal(total(game.pits), 61);
+        assert.equal(total(game.pits), 57);
     });
 
     it('player 1 skips player 0 store when sowing around', () => {
