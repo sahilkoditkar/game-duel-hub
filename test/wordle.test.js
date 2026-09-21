@@ -42,7 +42,8 @@ describe('Wordle feedback', () => {
         // secret has one e: only the first unmatched e in the guess is yellow
         assert.deepEqual(calculateFeedback('abbey', 'keeps'), [0, 1, 0, 0, 0]);
         // exact match takes priority over a present match elsewhere
-        assert.deepEqual(calculateFeedback('allow', 'lulls'), [0, 0, 2, 1, 0]);
+        // secret has two l's: the exact match at index 2 and the first stray l (index 0) get credit, the third l does not
+        assert.deepEqual(calculateFeedback('allow', 'lulls'), [1, 0, 2, 0, 0]);
     });
 });
 

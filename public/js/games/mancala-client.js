@@ -31,7 +31,7 @@ function initMancala(socket, container, roomId, playerIndex, initialState) {
         .mc-scores .me { color: var(--secondary-color); font-weight: bold; }
         .mc-board {
             display: grid;
-            grid-template-columns: minmax(40px, 1fr) repeat(6, minmax(36px, 1.2fr)) minmax(40px, 1fr);
+            grid-template-columns: minmax(0, 1fr) repeat(6, minmax(0, 1.2fr)) minmax(0, 1fr);
             grid-template-rows: 1fr 1fr;
             gap: clamp(3px, 1.2vw, 6px);
             width: 100%;
@@ -43,6 +43,7 @@ function initMancala(socket, container, roomId, playerIndex, initialState) {
             touch-action: manipulation;
         }
         .mc-store {
+            min-width: 0;
             grid-row: 1 / span 2;
             background: #3d2812;
             border-radius: 20px;
@@ -58,6 +59,7 @@ function initMancala(socket, container, roomId, playerIndex, initialState) {
         .mc-store.right { grid-column: 8; }
         .mc-store.mine { border-color: var(--secondary-color); }
         .mc-pit {
+            min-width: 0;
             position: relative;
             aspect-ratio: 1;
             background: #3d2812;

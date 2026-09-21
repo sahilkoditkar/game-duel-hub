@@ -131,10 +131,10 @@ describe('Anagram scoring and rules', () => {
         assert.equal(game.makeMove(0, { word: 'rat' }).valid, true);
         assert.equal(game.makeMove(0, { word: ' RATE ' }).valid, true, 'trims and lowercases');
         assert.equal(game.makeMove(0, { word: 'plate' }).valid, true);
-        assert.deepEqual(game.scores, [11, 0]);
+        assert.deepEqual(game.scores, [12, 0]);
         const s0 = game.getStateForPlayer(0);
         assert.deepEqual(s0.myWords, [{ word: 'rat', points: 3 }, { word: 'rate', points: 4 }, { word: 'plate', points: 5 }]);
-        assert.equal(s0.myScore, 11);
+        assert.equal(s0.myScore, 12);
         assert.equal(s0.oppScore, 0);
         assert.equal(s0.oppWordCount, 0);
         game.cleanup();
