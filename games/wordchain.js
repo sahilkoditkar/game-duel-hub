@@ -284,3 +284,4 @@ class WordChain extends BaseGame {
 }
 
 module.exports = WordChain;
+module.exports.WORDS = WORDS;

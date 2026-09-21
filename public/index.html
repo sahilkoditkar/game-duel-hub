@@ -29,24 +29,15 @@
             <div class="card">
                 <h2>Create Room</h2>
                 <div class="form-group">
-                    <label for="game-select">Choose Game</label>
-                    <select id="game-select" class="input dark">
-                        <option value="tictactoe">Tic-Tac-Toe</option>
-                        <option value="dotsandboxes">Dots and Boxes</option>
-                        <option value="bingo">Bingo</option>
-                        <option value="battleship">Battleship</option>
-                        <option value="hangman">Hangman</option>
-                        <option value="mastermind">Mastermind (Numbers)</option>
-                        <option value="connectfour">Connect Four</option>
-                        <option value="nim">Nim</option>
-                        <option value="memory">Memory Match</option>
-                        <option value="wordchain">Word Chain</option>
-                        <option value="reversi">Reversi (Othello)</option>
-                        <option value="checkers">Checkers</option>
-                        <option value="rps">Rock Paper Scissors</option>
-                    </select>
+                    <label>Pick a category</label>
+                    <div id="category-tabs" class="category-tabs" role="tablist"></div>
                 </div>
-                <button id="create-btn" class="btn primary">Create Room</button>
+                <div class="form-group">
+                    <label id="games-label">Choose a game</label>
+                    <div id="game-grid" class="game-grid" role="listbox" aria-labelledby="games-label"></div>
+                </div>
+                <div id="selected-game" class="selected-game"></div>
+                <button id="create-btn" class="btn primary" disabled>Create Room</button>
             </div>
 
             <div class="card">
@@ -95,6 +86,7 @@
     <div id="toast" class="toast hidden" role="status"></div>
 
     <script src="/socket.io/socket.io.js"></script>
+    <script src="js/catalog.js"></script>
     <script src="js/main.js"></script>
 </body>
 

@@ -388,3 +388,111 @@ select:focus {
 .conn-banner.hidden {
     display: none;
 }
+
+/* Lobby: category tabs + game cards */
+.category-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+}
+
+.category-tab {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid #444;
+    background: #2c2c2c;
+    color: var(--text-color);
+    font-size: 0.9rem;
+    cursor: pointer;
+    white-space: nowrap;
+    touch-action: manipulation;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.category-tab.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #000;
+    font-weight: bold;
+}
+
+.category-icon {
+    font-size: 1rem;
+}
+
+.category-count {
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 999px;
+    padding: 1px 7px;
+    font-size: 0.75rem;
+}
+
+.category-tab.active .category-count {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+}
+
+.game-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 12px;
+    border-radius: 10px;
+    border: 2px solid #3a3a3a;
+    background: #2c2c2c;
+    color: var(--text-color);
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+}
+
+.game-card:active {
+    transform: scale(0.98);
+}
+
+.game-card.selected {
+    border-color: var(--secondary-color);
+    background: #14332f;
+}
+
+.game-card-title {
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.game-card-tag {
+    font-size: 0.78rem;
+    color: #aaa;
+    line-height: 1.3;
+}
+
+.selected-game {
+    min-height: 1.2em;
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (hover: hover) {
+    .category-tab:not(.active):hover { background: #383838; }
+    .game-card:not(.selected):hover { border-color: #555; }
+}

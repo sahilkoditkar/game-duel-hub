@@ -1,37 +1,15 @@
 const socket = io();
 
-// Game init function registry
-const GAME_INIT = {
-    tictactoe: 'initTicTacToe',
-    dotsandboxes: 'initDotsAndBoxes',
-    bingo: 'initBingo',
-    battleship: 'initBattleship',
-    hangman: 'initHangman',
-    mastermind: 'initMastermind',
-    connectfour: 'initConnectFour',
-    nim: 'initNim',
-    memory: 'initMemory',
-    wordchain: 'initWordChain',
-    reversi: 'initReversi',
-    checkers: 'initCheckers',
-    rps: 'initRps'
-};
-
-const GAME_LABELS = {
-    tictactoe: 'Tic-Tac-Toe',
-    dotsandboxes: 'Dots and Boxes',
-    bingo: 'Bingo',
-    battleship: 'Battleship',
-    hangman: 'Hangman',
-    mastermind: 'Mastermind',
-    connectfour: 'Connect Four',
-    nim: 'Nim',
-    memory: 'Memory Match',
-    wordchain: 'Word Chain',
-    reversi: 'Reversi',
-    checkers: 'Checkers',
-    rps: 'Rock Paper Scissors'
-};
+// Game registries are derived from the shared catalog (js/catalog.js)
+const CATALOG = window.GAME_CATALOG || { CATEGORIES: [], GAMES: [] };
+const GAME_INIT = {};
+const GAME_LABELS = {};
+const GAME_BY_ID = {};
+for (const game of CATALOG.GAMES) {
+    GAME_INIT[game.id] = game.clientInit;
+    GAME_LABELS[game.id] = game.label;
+    GAME_BY_ID[game.id] = game;
+}
 
 const SESSION_KEY = 'gamehub_session';
 
@@ -41,7 +19,9 @@ const gameContainer = document.getElementById('game-container');
 const createBtn = document.getElementById('create-btn');
 const joinBtn = document.getElementById('join-btn');
 const roomIdInput = document.getElementById('room-id-input');
-const gameSelect = document.getElementById('game-select');
+const categoryTabs = document.getElementById('category-tabs');
+const gameGrid = document.getElementById('game-grid');
+const selectedGameEl = document.getElementById('selected-game');
 const playerNameInput = document.getElementById('player-name-input');
 const currentRoomIdSpan = document.getElementById('current-room-id');
 const copyRoomBtn = document.getElementById('copy-room-btn');
@@ -106,9 +86,106 @@ if (playerNameInput) {
     playerNameInput.addEventListener('change', rememberName);
 }
 
+// ---- Lobby: category tabs + game cards ----
+const LAST_GAME_KEY = 'gamehub_last_game';
+let selectedGameId = null;
+let selectedCategoryId = null;
+
+function rememberGame(id) {
+    try { localStorage.setItem(LAST_GAME_KEY, id); } catch { /* ignore */ }
+}
+
+function selectGame(id) {
+    selectedGameId = id;
+    const game = GAME_BY_ID[id];
+    createBtn.disabled = !game;
+    createBtn.textContent = game ? `Create ${game.label} Room` : 'Create Room';
+    selectedGameEl.textContent = game ? game.tagline : '';
+    gameGrid.querySelectorAll('.game-card').forEach(card => {
+        const on = card.dataset.id === id;
+        card.classList.toggle('selected', on);
+        card.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+}
+
+function renderGameGrid(categoryId) {
+    selectedCategoryId = categoryId;
+    categoryTabs.querySelectorAll('.category-tab').forEach(tab => {
+        const on = tab.dataset.id === categoryId;
+        tab.classList.toggle('active', on);
+        tab.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    gameGrid.innerHTML = '';
+    const games = CATALOG.GAMES.filter(g => g.category === categoryId);
+    for (const game of games) {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'game-card';
+        card.dataset.id = game.id;
+        card.setAttribute('role', 'option');
+        const title = document.createElement('span');
+        title.className = 'game-card-title';
+        title.textContent = game.label;
+        const tag = document.createElement('span');
+        tag.className = 'game-card-tag';
+        tag.textContent = game.tagline;
+        card.appendChild(title);
+        card.appendChild(tag);
+        card.addEventListener('click', () => {
+            selectGame(game.id);
+            rememberGame(game.id);
+        });
+        gameGrid.appendChild(card);
+    }
+    // Keep the selection if it belongs to this category, otherwise pick the first game.
+    const keep = games.some(g => g.id === selectedGameId);
+    selectGame(keep ? selectedGameId : (games[0] ? games[0].id : null));
+}
+
+function buildLobby() {
+    if (!categoryTabs || !gameGrid) return;
+    categoryTabs.innerHTML = '';
+    for (const cat of CATALOG.CATEGORIES) {
+        const count = CATALOG.GAMES.filter(g => g.category === cat.id).length;
+        const tab = document.createElement('button');
+        tab.type = 'button';
+        tab.className = 'category-tab';
+        tab.dataset.id = cat.id;
+        tab.setAttribute('role', 'tab');
+        tab.title = cat.blurb;
+        const icon = document.createElement('span');
+        icon.className = 'category-icon';
+        icon.textContent = cat.icon;
+        const label = document.createElement('span');
+        label.textContent = cat.label;
+        const badge = document.createElement('span');
+        badge.className = 'category-count';
+        badge.textContent = count;
+        tab.appendChild(icon);
+        tab.appendChild(label);
+        tab.appendChild(badge);
+        tab.addEventListener('click', () => renderGameGrid(cat.id));
+        categoryTabs.appendChild(tab);
+    }
+
+    let last = null;
+    try { last = localStorage.getItem(LAST_GAME_KEY); } catch { /* ignore */ }
+    const lastGame = last && GAME_BY_ID[last];
+    selectedGameId = lastGame ? lastGame.id : null;
+    const firstCat = lastGame ? lastGame.category : (CATALOG.CATEGORIES[0] && CATALOG.CATEGORIES[0].id);
+    if (firstCat) renderGameGrid(firstCat);
+}
+
+buildLobby();
+
 createBtn.addEventListener('click', () => {
+    if (!selectedGameId) {
+        showToast('Pick a game first');
+        return;
+    }
     rememberName();
-    socket.emit('create_room', { gameType: gameSelect.value, playerName: getPlayerName() });
+    rememberGame(selectedGameId);
+    socket.emit('create_room', { gameType: selectedGameId, playerName: getPlayerName() });
 });
 
 joinBtn.addEventListener('click', tryJoin);
